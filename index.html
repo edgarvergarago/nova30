@@ -1,0 +1,1711 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NOVA 30</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --orange: #FF4002;
+      --orange-dim: rgba(255,64,2,0.15);
+      --orange-glow: rgba(255,64,2,0.3);
+      --bg: #0a0a0a;
+      --bg2: #111111;
+      --bg3: #181818;
+      --border: rgba(255,255,255,0.07);
+      --text: #ffffff;
+      --text-dim: rgba(255,255,255,0.5);
+      --text-muted: rgba(255,255,255,0.25);
+      --radius: 12px;
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-body: 'Inter', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── SCREENS ─── */
+    .screen { display: none; min-height: 100vh; }
+    .screen.active { display: flex; flex-direction: column; }
+
+    /* ─── LOGIN SCREEN ─── */
+    #screen-login {
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      position: relative;
+      overflow: hidden;
+    }
+    #screen-login::before {
+      content: '';
+      position: absolute;
+      top: -200px; left: 50%; transform: translateX(-50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(255,64,2,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .login-box {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    .login-logo {
+      background: #000;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 32px;
+      display: inline-block;
+    }
+    .login-logo svg { width: 180px; height: auto; }
+    .login-box h2 {
+      font-family: var(--font-display);
+      font-size: 28px;
+      letter-spacing: 2px;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .login-box p {
+      color: var(--text-dim);
+      font-size: 13px;
+      margin-bottom: 28px;
+    }
+    .input-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .input-group input {
+      flex: 1;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 16px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-group input:focus { border-color: var(--orange); }
+    .btn-primary {
+      width: 100%;
+      background: var(--orange);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 14px;
+      font-family: var(--font-display);
+      font-size: 18px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+    .login-guest {
+      margin-top: 14px;
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .login-guest:hover { color: var(--text-dim); }
+    .login-error {
+      color: var(--orange);
+      font-size: 12px;
+      margin-top: 8px;
+      display: none;
+    }
+
+    /* ─── MAIN APP ─── */
+    #screen-app {
+      flex-direction: column;
+    }
+
+    /* NAV */
+    .nav {
+      background: #000;
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 56px;
+    }
+    .nav-logo {
+      background: #000;
+      padding: 8px 16px 8px 0;
+      border-right: 1px solid var(--border);
+      margin-right: 8px;
+      display: flex;
+      align-items: center;
+    }
+    .nav-logo svg { width: 110px; height: auto; }
+    .nav-tabs {
+      display: flex;
+      gap: 2px;
+      flex: 1;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .nav-tabs::-webkit-scrollbar { display: none; }
+    .nav-tab {
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.2s;
+      white-space: nowrap;
+      border: none;
+      background: none;
+      font-family: var(--font-body);
+    }
+    .nav-tab:hover { color: var(--text-dim); background: var(--bg3); }
+    .nav-tab.active { color: var(--orange); background: var(--orange-dim); }
+    .nav-tab .tab-icon { margin-right: 5px; }
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: auto;
+    }
+    .nav-user {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+    .nav-logout {
+      font-size: 11px;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      transition: all 0.2s;
+    }
+    .nav-logout:hover { border-color: var(--orange); color: var(--orange); }
+
+    /* CONTENT AREA */
+    .content {
+      flex: 1;
+      padding: 32px 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* TABS */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ─── SECTION HEADER ─── */
+    .section-header {
+      margin-bottom: 28px;
+    }
+    .section-header h1 {
+      font-family: var(--font-display);
+      font-size: 38px;
+      letter-spacing: 2px;
+      color: var(--text);
+      line-height: 1;
+    }
+    .section-header h1 span { color: var(--orange); }
+    .section-header p {
+      color: var(--text-dim);
+      font-size: 13px;
+      margin-top: 6px;
+    }
+
+    /* ─── CARDS ─── */
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+    }
+    .card + .card { margin-top: 12px; }
+
+    /* ─── AGENDA ─── */
+    .agenda-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 640px) { .agenda-grid { grid-template-columns: 1fr; } }
+    .agenda-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--orange);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .agenda-card:hover { background: var(--bg3); }
+    .agenda-card.past { border-left-color: rgba(255,255,255,0.15); opacity: 0.6; }
+    .agenda-card.next { border-left-color: var(--orange); box-shadow: 0 0 20px var(--orange-glow); }
+    .agenda-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+    .tag-digital { background: rgba(100,160,255,0.1); color: #64a0ff; }
+    .tag-presencial { background: rgba(100,220,120,0.1); color: #64dc78; }
+    .tag-reto { background: var(--orange-dim); color: var(--orange); }
+    .tag-hotseat { background: rgba(255,180,0,0.1); color: #ffb400; }
+    .agenda-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .agenda-date {
+      font-size: 12px;
+      color: var(--orange);
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .agenda-desc {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+    .next-badge {
+      display: inline-block;
+      background: var(--orange);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    /* ─── MIEMBROS ─── */
+    .members-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .btn-add {
+      background: var(--orange);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: opacity 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-add:hover { opacity: 0.85; }
+    .members-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+    }
+    .member-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: border-color 0.2s;
+    }
+    .member-card:hover { border-color: rgba(255,64,2,0.3); }
+    .member-avatar {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: var(--orange-dim);
+      border: 2px solid var(--orange);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .member-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .member-name { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
+    .member-skill {
+      font-size: 11px;
+      color: var(--orange);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    .member-country { font-size: 12px; color: var(--text-dim); margin-bottom: 8px; }
+    .member-links { display: flex; gap: 8px; flex-wrap: wrap; }
+    .member-link {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-decoration: none;
+      display: flex; align-items: center; gap: 4px;
+      transition: color 0.2s;
+    }
+    .member-link:hover { color: var(--orange); }
+    .empty-state {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state .emoji { font-size: 40px; margin-bottom: 12px; }
+    .empty-state p { font-size: 14px; }
+
+    /* ─── LINKS ─── */
+    .links-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+    }
+    .link-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .link-card:hover { border-color: var(--orange); background: var(--bg3); transform: translateY(-2px); }
+    .link-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      background: var(--orange-dim);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .link-info h3 { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+    .link-info p { font-size: 11px; color: var(--text-dim); }
+    .link-arrow { margin-left: auto; color: var(--text-muted); font-size: 16px; }
+
+    /* ─── LEADERBOARD ─── */
+    .podium {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 28px;
+      padding: 20px;
+    }
+    .podium-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .podium-rank {
+      font-family: var(--font-display);
+      font-size: 48px;
+      color: var(--text-muted);
+      line-height: 1;
+    }
+    .podium-item.first .podium-rank { color: #FFD700; font-size: 64px; }
+    .podium-item.second .podium-rank { color: #C0C0C0; }
+    .podium-item.third .podium-rank { color: #CD7F32; }
+    .podium-name { font-size: 13px; font-weight: 600; text-align: center; }
+    .podium-gmv { font-size: 12px; color: var(--orange); font-weight: 700; }
+    .podium-avatar {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: var(--bg3);
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+    }
+    .podium-item.first .podium-avatar { width: 72px; height: 72px; border-color: #FFD700; }
+
+    .leaderboard-table {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .lb-row {
+      display: grid;
+      grid-template-columns: 44px 1fr auto auto;
+      align-items: center;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s;
+      gap: 12px;
+    }
+    .lb-row:last-child { border-bottom: none; }
+    .lb-row:hover { background: var(--bg3); }
+    .lb-row.header {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      padding: 10px 20px;
+    }
+    .lb-pos {
+      font-family: var(--font-display);
+      font-size: 22px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    .lb-pos.top3 { color: var(--orange); }
+    .lb-name { font-size: 14px; font-weight: 500; }
+    .lb-country { font-size: 11px; color: var(--text-dim); }
+    .lb-gmv {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--orange);
+      text-align: right;
+    }
+    .lb-change { font-size: 12px; text-align: right; }
+    .lb-change.up { color: #64dc78; }
+    .lb-change.down { color: #ff6464; }
+    .lb-change.same { color: var(--text-muted); }
+
+    /* ─── ANUNCIOS ─── */
+    .announcement-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--orange);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 12px;
+    }
+    .announcement-card.pinned { border-left-color: #FFD700; }
+    .ann-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .ann-pin { font-size: 12px; color: #FFD700; }
+    .ann-date { font-size: 11px; color: var(--text-muted); }
+    .ann-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+    .ann-body { font-size: 13px; color: var(--text-dim); line-height: 1.6; white-space: pre-wrap; }
+
+    /* ─── NPS ─── */
+    .nps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .nps-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .nps-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .nps-card .nps-date { font-size: 11px; color: var(--text-dim); margin-bottom: 16px; }
+    .nps-stars {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .star {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .star:hover, .star.selected { background: var(--orange); border-color: var(--orange); color: #fff; }
+    .nps-rated { font-size: 12px; color: var(--text-dim); }
+    .nps-rated strong { color: var(--orange); }
+    .nps-comment-input {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 13px;
+      resize: none;
+      outline: none;
+      margin-top: 10px;
+    }
+    .nps-comment-input:focus { border-color: var(--orange); }
+    .btn-submit-nps {
+      margin-top: 10px;
+      background: var(--orange);
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font-body);
+    }
+    .btn-submit-nps:hover { opacity: 0.85; }
+
+    /* ─── ADMIN ─── */
+    #screen-admin {
+      flex-direction: column;
+    }
+    .admin-nav {
+      background: #000;
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .admin-nav svg { width: 100px; }
+    .admin-nav h2 { font-family: var(--font-display); font-size: 20px; letter-spacing: 1px; color: var(--orange); }
+    .admin-nav-right { margin-left: auto; display: flex; gap: 8px; }
+    .admin-content {
+      padding: 28px 24px;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .admin-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0;
+    }
+    .admin-tab {
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      border: none;
+      background: none;
+      font-family: var(--font-body);
+      margin-bottom: -1px;
+    }
+    .admin-tab.active { color: var(--orange); border-bottom-color: var(--orange); }
+    .admin-tab:hover:not(.active) { color: var(--text-dim); }
+    .admin-section { display: none; }
+    .admin-section.active { display: block; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-label { font-size: 12px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block; }
+    .form-input {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px 14px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus { border-color: var(--orange); }
+    .form-textarea {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px 14px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 13px;
+      outline: none;
+      resize: vertical;
+      min-height: 80px;
+      transition: border-color 0.2s;
+    }
+    .form-textarea:focus { border-color: var(--orange); }
+    .form-select {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px 14px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 13px;
+      outline: none;
+      appearance: none;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+    .form-check {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--text-dim);
+    }
+    .form-check input { accent-color: var(--orange); }
+    .btn-save {
+      background: var(--orange);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-family: var(--font-display);
+      font-size: 16px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-save:hover { opacity: 0.85; }
+    .btn-danger {
+      background: transparent;
+      color: #ff4444;
+      border: 1px solid #ff4444;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 11px;
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: all 0.2s;
+    }
+    .btn-danger:hover { background: rgba(255,68,68,0.1); }
+
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .admin-table th {
+      text-align: left;
+      padding: 10px 14px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+    .admin-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      vertical-align: middle;
+    }
+    .admin-table tr:last-child td { border-bottom: none; }
+    .admin-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* ─── MODAL ─── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      width: 100%;
+      max-width: 480px;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    .modal h2 {
+      font-family: var(--font-display);
+      font-size: 24px;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+    .btn-cancel {
+      background: transparent;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: var(--font-body);
+    }
+
+    /* ─── TOAST ─── */
+    #toast {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      background: var(--bg2);
+      border: 1px solid var(--orange);
+      color: var(--text);
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      z-index: 9999;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ─── STATS BAR ─── */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    @media (max-width: 640px) { .stats-bar { grid-template-columns: repeat(2, 1fr); } }
+    .stat-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+    }
+    .stat-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px; }
+    .stat-value { font-family: var(--font-display); font-size: 32px; color: var(--orange); line-height: 1; }
+    .stat-sub { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+
+    /* ADMIN LOGIN */
+    #screen-admin-login {
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+    }
+
+    /* Loading */
+    .loading-dots { color: var(--text-muted); font-size: 13px; }
+
+    /* Responsive tweaks */
+    @media (max-width: 768px) {
+      .content { padding: 20px 16px; }
+      .nav { padding: 0 16px; }
+      .login-box { padding: 36px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── LOGIN ─── -->
+<div id="screen-login" class="screen active">
+  <div class="login-box">
+    <div class="login-logo">
+      <svg viewBox="0 0 945.23 371.3" xmlns="http://www.w3.org/2000/svg">
+        <defs><style>.lc2{fill:#fff}.lc3{fill:#ff4002}.lc1{fill:none}.lc4{clip-path:url(#lcp)}</style><clipPath id="lcp"><rect class="lc1" x="272.03" width="401.17" height="114.87"/></clipPath></defs>
+        <g><polygon class="lc2" points="117.08 365.18 41.71 245.29 41.71 365.18 0 365.18 0 172.42 43.03 172.42 117.18 289.72 117.18 172.42 158.89 172.42 158.89 365.18 117.08 365.18"/><polygon class="lc2" points="394.2 365.18 395.67 172.42 440.24 172.42 437.29 298.72 526.07 172.42 573.81 172.42 435.23 365.18 394.2 365.18"/><polygon class="lc2" points="599.98 365.18 599.21 310.95 599.26 290.28 598.55 233.9 552.99 295.43 538.16 315.88 501.56 365.18 454.27 365.18 599.08 172.42 639.5 172.42 644 365.18 599.98 365.18"/><path class="lc2" d="M679.95,352.75c-12.63-10.72-19.4-25.53-20.31-44.43h27.81c1.09,12.18,5.36,21.49,12.81,27.94,7.45,6.45,17.62,9.68,30.53,9.68,12,0,21.85-3.09,29.58-9.27,7.72-6.17,11.58-14.45,11.58-24.8v-3.54c0-10.18-3.64-18.08-10.9-23.72-7.27-5.63-16.72-8.45-28.35-8.45h-11.36v-21.53h11.09c9.99,0,18.26-2.63,24.8-7.91,6.54-5.27,9.81-12.54,9.81-21.81v-3.54c0-9.09-3.32-16.4-9.95-21.94-6.64-5.54-15.22-8.32-25.76-8.32-12.18,0-21.81,3.32-28.9,9.95-7.09,6.64-10.91,15.86-11.45,27.67h-26.72c.55-11.99,3.68-22.49,9.4-31.48,5.72-9,13.58-15.99,23.58-20.99,9.99-5,21.26-7.5,33.8-7.5,11.81,0,22.44,2.14,31.89,6.41,9.44,4.27,16.85,10.32,22.22,18.13,5.36,7.81,8.04,16.72,8.04,26.71v2.73c0,10.18-3,18.95-9,26.3-5.99,7.36-13.54,12.59-22.62,15.67,11.27,2.73,20.44,8.04,27.53,15.95,7.09,7.9,10.63,17.76,10.63,29.58v3c0,10.9-2.91,20.58-8.72,29.03-5.82,8.45-14,14.99-24.54,19.62-10.54,4.63-22.54,6.95-35.98,6.95-21.08,0-37.94-5.36-50.56-16.08Z"/><path class="lc2" d="M822.56,343.08c-12.18-17.17-18.26-41.02-18.26-71.56v-5.45c0-30.35,6.13-54.15,18.4-71.42,12.27-17.26,29.57-25.9,51.93-25.9s40.39,8.59,52.47,25.76c12.08,17.17,18.13,41.03,18.13,71.56v5.45c0,30.9-6,54.84-17.99,71.83-12,16.99-29.54,25.49-52.61,25.49s-39.89-8.59-52.07-25.76ZM906.52,327.81c6.9-11.9,10.36-30.21,10.36-54.93v-8.18c0-24.71-3.5-43.02-10.49-54.93-7-11.9-17.59-17.86-31.76-17.86-27.99,0-41.98,24.26-41.98,72.78v8.18c0,48.52,14,72.78,41.98,72.78,14.35,0,24.99-5.95,31.89-17.86Z"/><g><polygon class="lc2" points="289.86 271.89 343.06 266.21 289.51 260.49 323.34 218.58 281.42 252.4 275.7 198.85 270.12 251.18 182.73 173.04 261.01 260.46 208.34 266.21 261.66 272.03 228.07 313.84 269.89 280.25 275.7 333.57 281.55 280.03 323.59 313.84 289.86 271.89"/><path class="lc2" d="M279.19,371.3c-56.52,0-102.51-45.98-102.51-102.51l.14-3.81,3.55-.11h13.48v3.92c0,47.05,38.28,85.34,85.34,85.34s85.35-38.29,85.35-85.35-38.29-85.35-85.35-85.35l-.7.02-3.71.03v-17.16l3.89-.03c.17,0,.35-.01.52-.01,56.52,0,102.51,45.98,102.51,102.51s-45.98,102.51-102.51,102.51Z"/></g></g>
+        <g class="lc4"><path class="lc2" d="M374.89,93.42h11.9c.27,0,.49-.22.49-.49v-22.38c0-6.12,3.14-9.5,7.81-9.5,4.91,0,6.68,3.3,6.68,8.94v22.94c0,.27.22.49.49.49h11.9c.27,0,.49-.22.49-.49v-26.24c0-9.26-3.94-15.94-14.49-15.94-6.6,0-10.71,3.38-12.8,6.92v-20.12c0-.27-.22-.49-.49-.49h-11.98c-.27,0-.49.22-.49.49v55.38c0,.27.22.49.49.49h0ZM440.9,94.46c13.12,0,21.82-8.86,21.82-21.5v-.81c0-12.56-8.7-21.42-21.82-21.42s-21.82,8.86-21.82,21.42v.81c0,12.64,8.62,21.5,21.82,21.5ZM440.9,84.08c-5.64,0-8.78-4.11-8.78-11.51s3.14-11.43,8.78-11.43,8.78,4.11,8.78,11.43-3.14,11.51-8.78,11.51ZM485.43,93.98c2.51,0,5.46-.43,7.68-.96.22-.05.37-.25.37-.48v-8.54c0-.32-.31-.56-.62-.47-1.23.33-2.64.63-4.29.63-4.11,0-5.64-1.37-5.64-4.67v-16.91h10.15c.13,0,.23-.1.23-.23v-10.32c0-.13-.1-.23-.23-.23h-10.15v-14.5c0-.13-.1-.23-.23-.23h-12.41c-.13,0-.23.1-.23.23v14.5h-6.12c-.13,0-.23.1-.23.23v10.32c0,.13.1.23.23.23h6.12v17.8c0,8.94,4.83,13.61,15.38,13.61M498.81,93.42h11.9c.27,0,.49-.22.49-.49v-21.97c0-6.92,2.9-9.99,7.33-9.99,4.03,0,6.04,2.9,6.04,8.53v23.42c0,.27.22.49.49.49h11.9c.27,0,.49-.22.49-.49v-21.89c0-6.84,2.66-10.07,7.17-10.07,4.03,0,6.2,2.74,6.2,8.45v23.5c0,.27.22.49.49.49h11.9c.27,0,.49-.22.49-.49v-25.92c0-9.66-4.03-16.26-14.25-16.26-6.04,0-10.55,2.98-13.45,7.73-2.09-5.32-6.36-7.73-12.56-7.73s-10.55,3.78-12.48,7.41l-.3-5.89c-.01-.26-.23-.47-.49-.47h-11.36c-.27,0-.49.22-.49.49v40.64c0,.27.22.49.49.49h-.02ZM582.05,94.46c6.04,0,10.31-2.58,13.04-7.09l.52,5.59c.02.25.24.45.49.45h10.73c.27,0,.49-.22.49-.49v-28.01c0-8.7-7.09-14.17-18.44-14.17s-18.36,4.77-19.35,12.82c-.04.29.2.54.49.54h11.22c.23,0,.42-.16.48-.38.68-2.49,2.84-3.81,6.83-3.81,4.19,0,6.2,1.85,6.2,4.91v4.59c-2.58-1.21-5.96-1.77-9.18-1.77-10.79,0-17.88,5.56-17.88,13.85,0,7.81,6.04,12.96,14.33,12.96M586.56,85.2c-4.11,0-6.44-1.93-6.44-4.83s2.42-5.07,7.73-5.07c2.33,0,4.51.4,6.92,1.29v1.77c0,4.11-3.46,6.84-8.21,6.84M613.06,93.42h11.9c.27,0,.49-.22.49-.49v-19.8c0-6.84,3.38-10.55,10.95-10.55h2.16c.27,0,.49-.22.49-.49v-10.05c0-.27-.22-.49-.49-.49h-1.84c-6.12,0-9.5,2.42-11.59,7.73l-.08-7c0-.27-.22-.49-.49-.49h-11.5c-.27,0-.49.22-.49.49v40.64c0,.27.22.49.49.49h0ZM665.15,93.98c2.51,0,5.45-.43,7.67-.96.22-.05.38-.25.38-.48v-8.53c0-.33-.31-.57-.63-.48-1.23.33-2.64.63-4.28.63-4.11,0-5.64-1.37-5.64-4.67v-16.91h9.89c.27,0,.49-.22.49-.49v-9.8c0-.27-.22-.49-.49-.49h-9.89v-14.24c0-.27-.22-.49-.49-.49h-11.9c-.27,0-.49.22-.49.49v14.24h-5.87c-.27,0-.49.22-.49.49v9.8c0,.27.22.49.49.49h5.87v17.8c0,8.94,4.83,13.61,15.38,13.61"/><path class="lc3" d="M352.14,53.97c-1.48-5.25-3.61-10.36-6.67-15.41,0,0-2.89-4.78-4.1-6.22-.29-.37-.9.04-.67.46.34.71.65,1.58.43,2.44-.35,1.04-1.51,1.77-2.59,1.39-.28-.12-.55-.29-.79-.53-1.1-1.14-1.66-3.01-2.38-5.39-.64-2.12-1.43-4.76-2.86-7.61-2.32-4.63-5.08-6.78-5.19-6.87-.14-.11-.33-.11-.48,0-.15.11-.21.29-.15.46.01.04,1.17,3.86-1.06,6.75-.89,1.16-2.24,1.85-3.82,1.95-1.58.1-3.15-.42-4.1-1.36-2.33-2.34-2.61-6.5-2.56-8.77.15-7.56,2.43-12.85,3.62-14.6.11-.15.1-.35-.02-.5-.12-.14-.3-.2-.47-.12-9.24,4.02-15.94,10.86-19.35,19.8-1.93,5.31-2.76,7.74-3.45,9.26-.63,1.39-1.21,2.04-1.8,2.39-.32.2-.73.31-1.13.33-.6-.06-3.58-.61-.99-5.6.22-.41-.35-.84-.67-.49l-2.05,2.26c-.09.1-.19.2-.28.3l-.34.38c-.06.07-.11.13-.16.2-6.46,7.38-10.98,16.82-13.58,25.55-2.33,8.4-2.48,15.1-2.46,17.65v.56c0,11.29,4.29,21.89,12.1,29.88,7.8,7.97,18.17,12.38,29.2,12.38s21.4-4.39,29.2-12.38c7.8-7.98,12.1-18.59,12.1-29.88,0-7.19-.93-13.05-2.49-18.65M313.33,94.5c-11.8,0-21.38-9.8-21.38-21.87s9.57-21.87,21.38-21.87,21.38,9.8,21.38,21.87-9.57,21.87-21.38,21.87Z"/></g>
+      </svg>
+    </div>
+    <h2>BIENVENIDO</h2>
+    <p>Ingresa tu número de WhatsApp para acceder</p>
+    <div class="input-group">
+      <input type="tel" id="login-phone" placeholder="+52 55 1234 5678" />
+    </div>
+    <div class="login-error" id="login-error">Número no registrado en NOVA 30</div>
+    <button class="btn-primary" onclick="handleLogin()">INGRESAR</button>
+    <div class="login-guest" onclick="handleGuest()">Solo ver la agenda →</div>
+  </div>
+</div>
+
+<!-- ─── MAIN APP ─── -->
+<div id="screen-app" class="screen">
+  <nav class="nav">
+    <div class="nav-logo">
+      <svg viewBox="0 0 945.23 371.3" xmlns="http://www.w3.org/2000/svg">
+        <defs><style>.nc2{fill:#fff}.nc3{fill:#ff4002}.nc1{fill:none}.nc4{clip-path:url(#ncp)}</style><clipPath id="ncp"><rect class="nc1" x="272.03" width="401.17" height="114.87"/></clipPath></defs>
+        <g><polygon class="nc2" points="117.08 365.18 41.71 245.29 41.71 365.18 0 365.18 0 172.42 43.03 172.42 117.18 289.72 117.18 172.42 158.89 172.42 158.89 365.18 117.08 365.18"/><polygon class="nc2" points="394.2 365.18 395.67 172.42 440.24 172.42 437.29 298.72 526.07 172.42 573.81 172.42 435.23 365.18 394.2 365.18"/><polygon class="nc2" points="599.98 365.18 599.21 310.95 599.26 290.28 598.55 233.9 552.99 295.43 538.16 315.88 501.56 365.18 454.27 365.18 599.08 172.42 639.5 172.42 644 365.18 599.98 365.18"/><path class="nc2" d="M679.95,352.75c-12.63-10.72-19.4-25.53-20.31-44.43h27.81c1.09,12.18,5.36,21.49,12.81,27.94,7.45,6.45,17.62,9.68,30.53,9.68,12,0,21.85-3.09,29.58-9.27,7.72-6.17,11.58-14.45,11.58-24.8v-3.54c0-10.18-3.64-18.08-10.9-23.72-7.27-5.63-16.72-8.45-28.35-8.45h-11.36v-21.53h11.09c9.99,0,18.26-2.63,24.8-7.91,6.54-5.27,9.81-12.54,9.81-21.81v-3.54c0-9.09-3.32-16.4-9.95-21.94-6.64-5.54-15.22-8.32-25.76-8.32-12.18,0-21.81,3.32-28.9,9.95-7.09,6.64-10.91,15.86-11.45,27.67h-26.72c.55-11.99,3.68-22.49,9.4-31.48,5.72-9,13.58-15.99,23.58-20.99,9.99-5,21.26-7.5,33.8-7.5,11.81,0,22.44,2.14,31.89,6.41,9.44,4.27,16.85,10.32,22.22,18.13,5.36,7.81,8.04,16.72,8.04,26.71v2.73c0,10.18-3,18.95-9,26.3-5.99,7.36-13.54,12.59-22.62,15.67,11.27,2.73,20.44,8.04,27.53,15.95,7.09,7.9,10.63,17.76,10.63,29.58v3c0,10.9-2.91,20.58-8.72,29.03-5.82,8.45-14,14.99-24.54,19.62-10.54,4.63-22.54,6.95-35.98,6.95-21.08,0-37.94-5.36-50.56-16.08Z"/><path class="nc2" d="M822.56,343.08c-12.18-17.17-18.26-41.02-18.26-71.56v-5.45c0-30.35,6.13-54.15,18.4-71.42,12.27-17.26,29.57-25.9,51.93-25.9s40.39,8.59,52.47,25.76c12.08,17.17,18.13,41.03,18.13,71.56v5.45c0,30.9-6,54.84-17.99,71.83-12,16.99-29.54,25.49-52.61,25.49s-39.89-8.59-52.07-25.76ZM906.52,327.81c6.9-11.9,10.36-30.21,10.36-54.93v-8.18c0-24.71-3.5-43.02-10.49-54.93-7-11.9-17.59-17.86-31.76-17.86-27.99,0-41.98,24.26-41.98,72.78v8.18c0,48.52,14,72.78,41.98,72.78,14.35,0,24.99-5.95,31.89-17.86Z"/></g>
+        <g class="nc4"><path class="nc2" d="M374.89,93.42h11.9c.27,0,.49-.22.49-.49v-22.38c0-6.12,3.14-9.5,7.81-9.5,4.91,0,6.68,3.3,6.68,8.94v22.94c0,.27.22.49.49.49h11.9c.27,0,.49-.22.49-.49v-26.24c0-9.26-3.94-15.94-14.49-15.94-6.6,0-10.71,3.38-12.8,6.92v-20.12c0-.27-.22-.49-.49-.49h-11.98c-.27,0-.49.22-.49.49v55.38c0,.27.22.49.49.49h0ZM440.9,94.46c13.12,0,21.82-8.86,21.82-21.5v-.81c0-12.56-8.7-21.42-21.82-21.42s-21.82,8.86-21.82,21.42v.81c0,12.64,8.62,21.5,21.82,21.5ZM440.9,84.08c-5.64,0-8.78-4.11-8.78-11.51s3.14-11.43,8.78-11.43,8.78,4.11,8.78,11.43-3.14,11.51-8.78,11.51ZM485.43,93.98c2.51,0,5.46-.43,7.68-.96.22-.05.37-.25.37-.48v-8.54c0-.32-.31-.56-.62-.47-1.23.33-2.64.63-4.29.63-4.11,0-5.64-1.37-5.64-4.67v-16.91h10.15c.13,0,.23-.1.23-.23v-10.32c0-.13-.1-.23-.23-.23h-10.15v-14.5c0-.13-.1-.23-.23-.23h-12.41c-.13,0-.23.1-.23.23v14.5h-6.12c-.13,0-.23.1-.23.23v10.32c0,.13.1.23.23.23h6.12v17.8c0,8.94,4.83,13.61,15.38,13.61M498.81,93.42h11.9c.27,0,.49-.22.49-.49v-21.97c0-6.92,2.9-9.99,7.33-9.99,4.03,0,6.04,2.9,6.04,8.53v23.42c0,.27.22.49.49.49h11.9c.27,0,.49-.22.49-.49v-21.89c0-6.84,2.66-10.07,7.17-10.07,4.03,0,6.2,2.74,6.2,8.45v23.5c0,.27.22.49.49.49h11.9c.27,0,.49-.22.49-.49v-25.92c0-9.66-4.03-16.26-14.25-16.26-6.04,0-10.55,2.98-13.45,7.73-2.09-5.32-6.36-7.73-12.56-7.73s-10.55,3.78-12.48,7.41l-.3-5.89c-.01-.26-.23-.47-.49-.47h-11.36c-.27,0-.49.22-.49.49v40.64c0,.27.22.49.49.49h-.02ZM582.05,94.46c6.04,0,10.31-2.58,13.04-7.09l.52,5.59c.02.25.24.45.49.45h10.73c.27,0,.49-.22.49-.49v-28.01c0-8.7-7.09-14.17-18.44-14.17s-18.36,4.77-19.35,12.82c-.04.29.2.54.49.54h11.22c.23,0,.42-.16.48-.38.68-2.49,2.84-3.81,6.83-3.81,4.19,0,6.2,1.85,6.2,4.91v4.59c-2.58-1.21-5.96-1.77-9.18-1.77-10.79,0-17.88,5.56-17.88,13.85,0,7.81,6.04,12.96,14.33,12.96M586.56,85.2c-4.11,0-6.44-1.93-6.44-4.83s2.42-5.07,7.73-5.07c2.33,0,4.51.4,6.92,1.29v1.77c0,4.11-3.46,6.84-8.21,6.84M613.06,93.42h11.9c.27,0,.49-.22.49-.49v-19.8c0-6.84,3.38-10.55,10.95-10.55h2.16c.27,0,.49-.22.49-.49v-10.05c0-.27-.22-.49-.49-.49h-1.84c-6.12,0-9.5,2.42-11.59,7.73l-.08-7c0-.27-.22-.49-.49-.49h-11.5c-.27,0-.49.22-.49.49v40.64c0,.27.22.49.49.49h0ZM665.15,93.98c2.51,0,5.45-.43,7.67-.96.22-.05.38-.25.38-.48v-8.53c0-.33-.31-.57-.63-.48-1.23.33-2.64.63-4.28.63-4.11,0-5.64-1.37-5.64-4.67v-16.91h9.89c.27,0,.49-.22.49-.49v-9.8c0-.27-.22-.49-.49-.49h-9.89v-14.24c0-.27-.22-.49-.49-.49h-11.9c-.27,0-.49.22-.49.49v14.24h-5.87c-.27,0-.49.22-.49.49v9.8c0,.27.22.49.49.49h5.87v17.8c0,8.94,4.83,13.61,15.38,13.61"/><path class="nc3" d="M352.14,53.97c-1.48-5.25-3.61-10.36-6.67-15.41,0,0-2.89-4.78-4.1-6.22-.29-.37-.9.04-.67.46.34.71.65,1.58.43,2.44-.35,1.04-1.51,1.77-2.59,1.39-.28-.12-.55-.29-.79-.53-1.1-1.14-1.66-3.01-2.38-5.39-.64-2.12-1.43-4.76-2.86-7.61-2.32-4.63-5.08-6.78-5.19-6.87-.14-.11-.33-.11-.48,0-.15.11-.21.29-.15.46.01.04,1.17,3.86-1.06,6.75-.89,1.16-2.24,1.85-3.82,1.95-1.58.1-3.15-.42-4.1-1.36-2.33-2.34-2.61-6.5-2.56-8.77.15-7.56,2.43-12.85,3.62-14.6.11-.15.1-.35-.02-.5-.12-.14-.3-.2-.47-.12-9.24,4.02-15.94,10.86-19.35,19.8-1.93,5.31-2.76,7.74-3.45,9.26-.63,1.39-1.21,2.04-1.8,2.39-.32.2-.73.31-1.13.33-.6-.06-3.58-.61-.99-5.6.22-.41-.35-.84-.67-.49l-2.05,2.26-.28.3-.34.38c-.06.07-.11.13-.16.2-6.46,7.38-10.98,16.82-13.58,25.55-2.33,8.4-2.48,15.1-2.46,17.65v.56c0,11.29,4.29,21.89,12.1,29.88,7.8,7.97,18.17,12.38,29.2,12.38s21.4-4.39,29.2-12.38c7.8-7.98,12.1-18.59,12.1-29.88,0-7.19-.93-13.05-2.49-18.65M313.33,94.5c-11.8,0-21.38-9.8-21.38-21.87s9.57-21.87,21.38-21.87,21.38,9.8,21.38,21.87-9.57,21.87-21.38,21.87Z"/></g>
+      </svg>
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="switchTab('inicio')"><span class="tab-icon">🏠</span>Inicio</button>
+      <button class="nav-tab" onclick="switchTab('agenda')"><span class="tab-icon">📅</span>Agenda 2026</button>
+      <button class="nav-tab" onclick="switchTab('miembros')"><span class="tab-icon">👥</span>Miembros</button>
+      <button class="nav-tab" onclick="switchTab('links')"><span class="tab-icon">🔗</span>Links</button>
+      <button class="nav-tab" onclick="switchTab('reto')"><span class="tab-icon">🏆</span>Reto NOVA</button>
+      <button class="nav-tab" onclick="switchTab('nps')"><span class="tab-icon">⭐</span>Evaluar</button>
+    </div>
+    <div class="nav-right">
+      <span class="nav-user" id="nav-user-label"></span>
+      <button class="nav-logout" onclick="handleLogout()">Salir</button>
+    </div>
+  </nav>
+
+  <div class="content">
+
+    <!-- ── INICIO ── -->
+    <div id="tab-inicio" class="tab-content active">
+      <div class="section-header">
+        <h1>BIENVENIDO A <span>NOVA 30</span></h1>
+        <p>La comunidad exclusiva de los 30 creadores hispanos de mayor impacto en Hotmart</p>
+      </div>
+
+      <!-- Anuncios -->
+      <div id="announcements-list">
+        <div class="loading-dots">Cargando anuncios...</div>
+      </div>
+
+      <!-- Próximo evento -->
+      <div style="margin-top:24px">
+        <h3 style="font-family:var(--font-display);font-size:20px;letter-spacing:1px;margin-bottom:12px;color:var(--text-dim)">PRÓXIMO EVENTO</h3>
+        <div id="next-event-card"></div>
+      </div>
+    </div>
+
+    <!-- ── AGENDA ── -->
+    <div id="tab-agenda" class="tab-content">
+      <div class="section-header">
+        <h1>AGENDA <span>2026</span></h1>
+        <p>Todos los encuentros y actividades del año</p>
+      </div>
+      <div class="agenda-grid" id="agenda-grid"></div>
+    </div>
+
+    <!-- ── MIEMBROS ── -->
+    <div id="tab-miembros" class="tab-content">
+      <div class="members-header">
+        <div class="section-header" style="margin:0">
+          <h1>DIRECTORIO <span>NOVA</span></h1>
+          <p id="members-count">Cargando...</p>
+        </div>
+        <button class="btn-add" id="btn-add-member" onclick="openMemberModal()">+ Agregar mi perfil</button>
+      </div>
+      <div class="members-grid" id="members-grid">
+        <div class="loading-dots">Cargando miembros...</div>
+      </div>
+    </div>
+
+    <!-- ── LINKS ── -->
+    <div id="tab-links" class="tab-content">
+      <div class="section-header">
+        <h1>LINKS <span>IMPORTANTES</span></h1>
+        <p>Acceso rápido a todos los recursos de NOVA 30</p>
+      </div>
+      <div class="links-grid" id="links-grid">
+        <div class="loading-dots">Cargando links...</div>
+      </div>
+    </div>
+
+    <!-- ── RETO NOVA ── -->
+    <div id="tab-reto" class="tab-content">
+      <div class="section-header">
+        <h1>RETO <span>NOVA</span></h1>
+        <p>Tabla de posiciones — GMV acumulado 2026</p>
+      </div>
+      <div id="leaderboard-container">
+        <div class="loading-dots">Cargando tabla...</div>
+      </div>
+    </div>
+
+    <!-- ── NPS ── -->
+    <div id="tab-nps" class="tab-content">
+      <div class="section-header">
+        <h1>EVALUAR <span>SESIONES</span></h1>
+        <p>Tu opinión nos ayuda a mejorar cada encuentro</p>
+      </div>
+      <div class="nps-grid" id="nps-grid">
+        <div class="loading-dots">Cargando sesiones...</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ─── ADMIN LOGIN ─── -->
+<div id="screen-admin-login" class="screen">
+  <div class="login-box">
+    <div class="login-logo" style="margin-bottom:24px">
+      <svg viewBox="0 0 945.23 371.3" xmlns="http://www.w3.org/2000/svg" style="width:160px">
+        <defs><style>.alc2{fill:#fff}.alc3{fill:#ff4002}.alc1{fill:none}</style></defs>
+        <g><polygon class="alc2" points="117.08 365.18 41.71 245.29 41.71 365.18 0 365.18 0 172.42 43.03 172.42 117.18 289.72 117.18 172.42 158.89 172.42 158.89 365.18 117.08 365.18"/></g>
+      </svg>
+    </div>
+    <h2 style="margin-bottom:4px">ADMIN</h2>
+    <p style="margin-bottom:24px">Acceso restrito</p>
+    <div class="form-group">
+      <input type="password" id="admin-pass" class="form-input" placeholder="Contraseña de administrador" />
+    </div>
+    <div class="login-error" id="admin-error">Contraseña incorrecta</div>
+    <button class="btn-primary" onclick="handleAdminLogin()">ENTRAR</button>
+    <div class="login-guest" style="margin-top:14px" onclick="showScreen('screen-login')">← Volver</div>
+  </div>
+</div>
+
+<!-- ─── ADMIN PANEL ─── -->
+<div id="screen-admin" class="screen">
+  <div class="admin-nav">
+    <svg viewBox="0 0 945.23 371.3" xmlns="http://www.w3.org/2000/svg">
+      <defs><style>.anc2{fill:#fff}.anc3{fill:#ff4002}.anc1{fill:none}</style></defs>
+      <g><polygon class="anc2" points="117.08 365.18 41.71 245.29 41.71 365.18 0 365.18 0 172.42 43.03 172.42 117.18 289.72 117.18 172.42 158.89 172.42 158.89 365.18 117.08 365.18"/><polygon class="anc3" points="394.2 365.18 395.67 172.42 440.24 172.42 437.29 298.72 526.07 172.42 573.81 172.42 435.23 365.18 394.2 365.18"/></g>
+    </svg>
+    <h2>PANEL ADMIN</h2>
+    <div class="admin-nav-right">
+      <button class="nav-logout" onclick="showScreen('screen-app')">← Ver app</button>
+      <button class="nav-logout" onclick="handleLogout()">Salir</button>
+    </div>
+  </div>
+  <div class="admin-content">
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="switchAdminTab('anuncios')">📢 Anuncios</button>
+      <button class="admin-tab" onclick="switchAdminTab('links-admin')">🔗 Links</button>
+      <button class="admin-tab" onclick="switchAdminTab('reto-admin')">🏆 Reto NOVA</button>
+      <button class="admin-tab" onclick="switchAdminTab('nps-admin')">⭐ Sesiones NPS</button>
+      <button class="admin-tab" onclick="switchAdminTab('miembros-admin')">👥 Miembros</button>
+    </div>
+
+    <!-- ANUNCIOS ADMIN -->
+    <div id="admin-anuncios" class="admin-section active">
+      <h3 style="font-family:var(--font-display);font-size:22px;margin-bottom:20px">NUEVO ANUNCIO</h3>
+      <div class="card">
+        <div class="form-group">
+          <label class="form-label">Título</label>
+          <input type="text" id="ann-title" class="form-input" placeholder="Ej: Recordatorio sesión de mañana" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mensaje</label>
+          <textarea id="ann-body" class="form-textarea" rows="4" placeholder="Escribe el anuncio..."></textarea>
+        </div>
+        <div class="form-check" style="margin-bottom:16px">
+          <input type="checkbox" id="ann-pinned" />
+          <label for="ann-pinned">Fijar anuncio (aparece primero con ⭐)</label>
+        </div>
+        <button class="btn-save" onclick="saveAnnouncement()">PUBLICAR</button>
+      </div>
+      <h3 style="font-family:var(--font-display);font-size:20px;margin:24px 0 14px">ANUNCIOS PUBLICADOS</h3>
+      <div id="admin-ann-list"></div>
+    </div>
+
+    <!-- LINKS ADMIN -->
+    <div id="admin-links-admin" class="admin-section">
+      <h3 style="font-family:var(--font-display);font-size:22px;margin-bottom:20px">AGREGAR LINK</h3>
+      <div class="card">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Nombre</label>
+            <input type="text" id="link-name" class="form-input" placeholder="Ej: Área de Miembros" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Emoji / Ícono</label>
+            <input type="text" id="link-emoji" class="form-input" placeholder="🎓" maxlength="4" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">URL</label>
+          <input type="url" id="link-url" class="form-input" placeholder="https://..." />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descripción corta</label>
+          <input type="text" id="link-desc" class="form-input" placeholder="Ej: Accede a tu contenido exclusivo" />
+        </div>
+        <button class="btn-save" onclick="saveLink()">GUARDAR LINK</button>
+      </div>
+      <h3 style="font-family:var(--font-display);font-size:20px;margin:24px 0 14px">LINKS ACTUALES</h3>
+      <div id="admin-links-list"></div>
+    </div>
+
+    <!-- RETO ADMIN -->
+    <div id="admin-reto-admin" class="admin-section">
+      <h3 style="font-family:var(--font-display);font-size:22px;margin-bottom:20px">ACTUALIZAR TABLA RETO</h3>
+      <div class="card" style="margin-bottom:16px">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Nombre del creador</label>
+            <input type="text" id="lb-name" class="form-input" placeholder="Nombre completo" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">País 🏳️</label>
+            <input type="text" id="lb-country" class="form-input" placeholder="México 🇲🇽" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">GMV Acumulado (USD)</label>
+            <input type="text" id="lb-gmv" class="form-input" placeholder="Ej: 1,250,000" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Posición actual</label>
+            <input type="number" id="lb-pos" class="form-input" placeholder="1" min="1" />
+          </div>
+        </div>
+        <button class="btn-save" onclick="saveLeaderboardEntry()">AGREGAR / ACTUALIZAR</button>
+      </div>
+      <h3 style="font-family:var(--font-display);font-size:20px;margin:24px 0 14px">TABLA ACTUAL</h3>
+      <div style="overflow-x:auto">
+        <table class="admin-table" id="admin-lb-table">
+          <thead><tr><th>#</th><th>Nombre</th><th>País</th><th>GMV</th><th></th></tr></thead>
+          <tbody id="admin-lb-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- NPS SESIONES ADMIN -->
+    <div id="admin-nps-admin" class="admin-section">
+      <h3 style="font-family:var(--font-display);font-size:22px;margin-bottom:20px">CREAR SESIÓN EVALUABLE</h3>
+      <div class="card">
+        <div class="form-group">
+          <label class="form-label">Nombre de la sesión</label>
+          <input type="text" id="nps-session-name" class="form-input" placeholder="Ej: Encuentro Digital #2" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fecha</label>
+          <input type="date" id="nps-session-date" class="form-input" />
+        </div>
+        <button class="btn-save" onclick="saveNPSSession()">CREAR SESIÓN</button>
+      </div>
+      <h3 style="font-family:var(--font-display);font-size:20px;margin:24px 0 14px">RESULTADOS NPS</h3>
+      <div id="admin-nps-results"></div>
+    </div>
+
+    <!-- MIEMBROS ADMIN -->
+    <div id="admin-miembros-admin" class="admin-section">
+      <h3 style="font-family:var(--font-display);font-size:22px;margin-bottom:20px">MIEMBROS REGISTRADOS</h3>
+      <div style="overflow-x:auto">
+        <table class="admin-table">
+          <thead><tr><th>Nombre</th><th>País</th><th>Habilidad</th><th>WhatsApp</th><th>Email</th><th></th></tr></thead>
+          <tbody id="admin-members-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ─── MODAL: AGREGAR MIEMBRO ─── -->
+<div class="modal-overlay" id="modal-member">
+  <div class="modal">
+    <h2>🌟 TU PERFIL <span style="color:var(--orange)">NOVA</span></h2>
+    <div class="form-group">
+      <label class="form-label">Nombre completo *</label>
+      <input type="text" id="m-name" class="form-input" placeholder="Tu nombre" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tu súper poder (especialidad)</label>
+      <input type="text" id="m-skill" class="form-input" placeholder="Ej: Email marketing, Lanzamientos, Ads..." />
+    </div>
+    <div class="form-group">
+      <label class="form-label">País</label>
+      <input type="text" id="m-country" class="form-input" placeholder="México 🇲🇽" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">WhatsApp</label>
+        <input type="tel" id="m-phone" class="form-input" placeholder="+52 55..." />
+      </div>
+      <div class="form-group">
+        <label class="form-label">@ Instagram</label>
+        <input type="text" id="m-instagram" class="form-input" placeholder="@usuario" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email Hotmart</label>
+      <input type="email" id="m-email" class="form-input" placeholder="tu@email.com" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Mayor desafío actual</label>
+      <textarea id="m-challenge" class="form-textarea" rows="2" placeholder="¿En qué necesitas apoyo de la comunidad?"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-member')">Cancelar</button>
+      <button class="btn-save" onclick="saveMember()">GUARDAR PERFIL</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── TOAST ─── -->
+<div id="toast"></div>
+
+<!-- ─── FIREBASE + APP SCRIPT ─── -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDZIRNjfOXwAPdf_FODCS2nJSEfzFrcjvE",
+  authDomain: "nova30-97f1b.firebaseapp.com",
+  databaseURL: "https://nova30-97f1b-default-rtdb.firebaseio.com",
+  projectId: "nova30-97f1b",
+  storageBucket: "nova30-97f1b.firebasestorage.app",
+  messagingSenderId: "775146781721",
+  appId: "1:775146781721:web:3e6390b107a1829a3cfe88"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// ── ADMIN PASSWORD (cámbiala) ──
+const ADMIN_PASS = "nova30admin2026";
+
+// ── AGENDA DATA ──
+const AGENDA = [
+  { id:1, type:'reto', title:'Reto NOVA', date:'Marzo 2026', desc:'Update #1 — posiciones parciales', past:true },
+  { id:2, type:'digital', title:'Update Reto #2 + Encuentro Digital #1', date:'Jue 9 abr · 10 AM MX | 11 AM COL', desc:'De creador a CEO: contrataciones, liderazgo y equipo', past:true },
+  { id:3, type:'reto', title:'Reto NOVA — Cierre', date:'15 mayo', desc:'Anuncio de los 2 ganadores', next:true },
+  { id:4, type:'presencial', title:'Encuentro Presencial', date:'Mié 24 jun · Fire Sessions Medellín', desc:'Sesión presencial' },
+  { id:5, type:'digital', title:'Encuentro Digital #2', date:'Jue 13 ago · 10 AM MX | 11 AM COL', desc:'Ingresos predecibles: Evergreen y diversificación' },
+  { id:6, type:'presencial', title:'Encuentro Presencial', date:'Mié 9 sep · Fire Brasil – Oficinas Hotmart', desc:'Sesión presencial' },
+  { id:7, type:'digital', title:'Encuentro Digital #3', date:'Jue 8 oct · 10 AM MX | 11 AM COL', desc:'Marca personal + negocio: audiencia sin sacrificar conversión' },
+  { id:8, type:'hotseat', title:'🔥 Hot Seat Q4', date:'Jue 12 nov · 10 AM MX | 11 AM COL', desc:'Sesión digital dedicada' },
+  { id:9, type:'digital', title:'Encuentro Digital #4', date:'Jue 10 dic · 10 AM MX | 11 AM COL', desc:'Cierre 2026: resultados del año y visión 2027' },
+];
+
+const TAG_MAP = {
+  digital: { label:'💻 Digital', cls:'tag-digital' },
+  presencial: { label:'🤝 Presencial', cls:'tag-presencial' },
+  reto: { label:'🏆 Reto NOVA', cls:'tag-reto' },
+  hotseat: { label:'🔥 Hot Seat', cls:'tag-hotseat' },
+};
+
+// ── GLOBALS ──
+let currentUser = null;
+let isAdmin = false;
+let membersData = {};
+let linksData = {};
+let leaderboardData = {};
+let announcementsData = {};
+let npsSessionsData = {};
+
+// ── UTILITIES ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+function switchAdminTab(name) {
+  document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('admin-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ── LOGIN ──
+window.handleLogin = function() {
+  const phone = document.getElementById('login-phone').value.trim();
+  if (!phone || phone.length < 7) {
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('login-error').textContent = 'Ingresa un número válido';
+    return;
+  }
+  // Check if in members list OR allow any (open community mode)
+  // For now: any valid phone gets in. Admin can restrict later.
+  document.getElementById('login-error').style.display = 'none';
+  currentUser = { phone };
+  localStorage.setItem('nova30_user', JSON.stringify(currentUser));
+  document.getElementById('nav-user-label').textContent = phone;
+  showScreen('screen-app');
+  loadAllData();
+};
+
+window.handleGuest = function() {
+  currentUser = { phone: 'invitado', guest: true };
+  document.getElementById('nav-user-label').textContent = 'Invitado';
+  showScreen('screen-app');
+  loadAllData();
+};
+
+window.handleLogout = function() {
+  currentUser = null;
+  isAdmin = false;
+  localStorage.removeItem('nova30_user');
+  showScreen('screen-login');
+};
+
+window.handleAdminLogin = function() {
+  const pass = document.getElementById('admin-pass').value;
+  if (pass === ADMIN_PASS) {
+    isAdmin = true;
+    document.getElementById('admin-error').style.display = 'none';
+    showScreen('screen-admin');
+    loadAdminData();
+  } else {
+    document.getElementById('admin-error').style.display = 'block';
+  }
+};
+
+// Secret admin access: triple-click on logo
+document.querySelector('.nav-logo').addEventListener('click', () => {
+  if (!isAdmin) showScreen('screen-admin-login');
+});
+
+// ── LOAD ALL DATA ──
+function loadAllData() {
+  renderAgenda();
+  loadMembers();
+  loadLinks();
+  loadLeaderboard();
+  loadAnnouncements();
+  loadNPSSessions();
+}
+
+// ── AGENDA ──
+function renderAgenda() {
+  const grid = document.getElementById('agenda-grid');
+  grid.innerHTML = AGENDA.map(e => {
+    const tag = TAG_MAP[e.type] || TAG_MAP.digital;
+    const cls = e.past ? 'past' : (e.next ? 'next' : '');
+    return `<div class="agenda-card ${cls}">
+      <div><span class="agenda-tag ${tag.cls}">${tag.label}</span>${e.next ? '<span class="next-badge">PRÓXIMO</span>' : ''}</div>
+      <div class="agenda-title">${e.title}</div>
+      <div class="agenda-date">${e.date}</div>
+      <div class="agenda-desc">${e.desc}</div>
+    </div>`;
+  }).join('');
+
+  // Next event card on home
+  const next = AGENDA.find(e => e.next);
+  if (next) {
+    const tag = TAG_MAP[next.type] || TAG_MAP.digital;
+    document.getElementById('next-event-card').innerHTML = `
+      <div class="agenda-card next" style="max-width:500px">
+        <div><span class="agenda-tag ${tag.cls}">${tag.label}</span><span class="next-badge">PRÓXIMO</span></div>
+        <div class="agenda-title">${next.title}</div>
+        <div class="agenda-date">${next.date}</div>
+        <div class="agenda-desc">${next.desc}</div>
+      </div>`;
+  }
+}
+
+// ── MEMBERS ──
+function loadMembers() {
+  onValue(ref(db, 'members'), snap => {
+    membersData = snap.val() || {};
+    renderMembers();
+  });
+}
+
+function renderMembers() {
+  const grid = document.getElementById('members-grid');
+  const entries = Object.entries(membersData);
+  document.getElementById('members-count').textContent = `${entries.length} miembro${entries.length !== 1 ? 's' : ''} registrado${entries.length !== 1 ? 's' : ''}`;
+  if (!entries.length) {
+    grid.innerHTML = `<div class="empty-state"><div class="emoji">🌟</div><p>Sé el primero en agregar tu perfil</p></div>`;
+    return;
+  }
+  grid.innerHTML = entries.map(([id, m]) => {
+    const initials = (m.name || '?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    return `<div class="member-card">
+      <div class="member-avatar">${initials}</div>
+      <div class="member-name">${m.name || ''}</div>
+      <div class="member-skill">${m.skill || ''}</div>
+      <div class="member-country">${m.country || ''}</div>
+      <div class="member-links">
+        ${m.instagram ? `<a href="https://instagram.com/${m.instagram.replace('@','')}" target="_blank" class="member-link">📸 ${m.instagram}</a>` : ''}
+        ${m.email ? `<a href="mailto:${m.email}" class="member-link">✉️ Email</a>` : ''}
+      </div>
+      ${m.challenge ? `<div style="margin-top:10px;font-size:11px;color:var(--text-muted);border-top:1px solid var(--border);padding-top:8px">"${m.challenge}"</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+window.openMemberModal = function() {
+  if (currentUser?.guest) { showToast('Inicia sesión para agregar tu perfil'); return; }
+  openModal('modal-member');
+};
+
+window.saveMember = async function() {
+  const name = document.getElementById('m-name').value.trim();
+  if (!name) { showToast('El nombre es obligatorio'); return; }
+  const member = {
+    name,
+    skill: document.getElementById('m-skill').value.trim(),
+    country: document.getElementById('m-country').value.trim(),
+    phone: document.getElementById('m-phone').value.trim() || currentUser?.phone,
+    instagram: document.getElementById('m-instagram').value.trim(),
+    email: document.getElementById('m-email').value.trim(),
+    challenge: document.getElementById('m-challenge').value.trim(),
+    createdAt: new Date().toISOString()
+  };
+  await push(ref(db, 'members'), member);
+  closeModal('modal-member');
+  showToast('✅ Perfil agregado al directorio');
+};
+
+// ── LINKS ──
+function loadLinks() {
+  onValue(ref(db, 'links'), snap => {
+    linksData = snap.val() || {};
+    renderLinks();
+  });
+}
+
+function renderLinks() {
+  const grid = document.getElementById('links-grid');
+  const entries = Object.entries(linksData);
+  if (!entries.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="emoji">🔗</div><p>El administrador aún no ha agregado links</p></div>`;
+    return;
+  }
+  grid.innerHTML = entries.map(([id, l]) => `
+    <div class="link-card" onclick="window.open('${l.url}','_blank')">
+      <div class="link-icon">${l.emoji || '🔗'}</div>
+      <div class="link-info"><h3>${l.name}</h3><p>${l.desc || ''}</p></div>
+      <div class="link-arrow">↗</div>
+    </div>
+  `).join('');
+}
+
+// ── LEADERBOARD ──
+function loadLeaderboard() {
+  onValue(ref(db, 'leaderboard'), snap => {
+    leaderboardData = snap.val() || {};
+    renderLeaderboard();
+  });
+}
+
+function renderLeaderboard() {
+  const container = document.getElementById('leaderboard-container');
+  const entries = Object.entries(leaderboardData).sort((a,b) => (a[1].pos||99) - (b[1].pos||99));
+  if (!entries.length) {
+    container.innerHTML = `<div class="empty-state"><div class="emoji">🏆</div><p>La tabla de posiciones será publicada pronto</p></div>`;
+    return;
+  }
+  const top3 = entries.slice(0,3);
+  const rest = entries.slice(3);
+  let html = `<div class="stats-bar" style="grid-template-columns:repeat(3,1fr)">`;
+  const medals = ['🥇','🥈','🥉'];
+  top3.forEach(([id,e],i) => {
+    html += `<div class="stat-card" style="text-align:center">
+      <div style="font-size:28px;margin-bottom:4px">${medals[i]}</div>
+      <div style="font-size:14px;font-weight:600;margin-bottom:4px">${e.name}</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-bottom:6px">${e.country||''}</div>
+      <div class="stat-value" style="font-size:20px">$${e.gmv}</div>
+    </div>`;
+  });
+  html += `</div>`;
+  if (rest.length) {
+    html += `<div class="leaderboard-table">
+      <div class="lb-row header"><div>#</div><div>Creador</div><div>País</div><div>GMV</div></div>`;
+    rest.forEach(([id,e]) => {
+      html += `<div class="lb-row">
+        <div class="lb-pos ${e.pos<=3?'top3':''}">${e.pos}</div>
+        <div><div class="lb-name">${e.name}</div></div>
+        <div class="lb-country">${e.country||''}</div>
+        <div class="lb-gmv">$${e.gmv}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  container.innerHTML = html;
+}
+
+// ── ANNOUNCEMENTS ──
+function loadAnnouncements() {
+  onValue(ref(db, 'announcements'), snap => {
+    announcementsData = snap.val() || {};
+    renderAnnouncements();
+  });
+}
+
+function renderAnnouncements() {
+  const list = document.getElementById('announcements-list');
+  const entries = Object.entries(announcementsData)
+    .sort((a,b) => (b[1].pinned?1:0) - (a[1].pinned?1:0) || new Date(b[1].createdAt) - new Date(a[1].createdAt));
+  if (!entries.length) {
+    list.innerHTML = '';
+    return;
+  }
+  list.innerHTML = entries.map(([id,a]) => `
+    <div class="announcement-card ${a.pinned?'pinned':''}">
+      <div class="ann-meta">
+        ${a.pinned ? '<span class="ann-pin">⭐ Fijado</span>' : ''}
+        <span class="ann-date">${new Date(a.createdAt).toLocaleDateString('es-MX', {day:'numeric',month:'short',year:'numeric'})}</span>
+      </div>
+      <div class="ann-title">${a.title}</div>
+      <div class="ann-body">${a.body}</div>
+    </div>
+  `).join('');
+}
+
+// ── NPS ──
+function loadNPSSessions() {
+  onValue(ref(db, 'nps_sessions'), snap => {
+    npsSessionsData = snap.val() || {};
+    renderNPS();
+  });
+}
+
+function renderNPS() {
+  const grid = document.getElementById('nps-grid');
+  const entries = Object.entries(npsSessionsData).sort((a,b) => new Date(b[1].date) - new Date(a[1].date));
+  if (!entries.length) {
+    grid.innerHTML = `<div class="loading-dots">No hay sesiones para evaluar aún</div>`;
+    return;
+  }
+  grid.innerHTML = entries.map(([id, s]) => {
+    const userVote = localStorage.getItem('nps_' + id);
+    const avgScore = s.scores ? (Object.values(s.scores).reduce((a,b)=>a+b,0)/Object.values(s.scores).length).toFixed(1) : null;
+    return `<div class="nps-card" id="nps-card-${id}">
+      <h3>${s.name}</h3>
+      <div class="nps-date">${s.date}</div>
+      ${userVote ? `<div class="nps-rated">Ya calificaste: <strong>${userVote}/10</strong> ⭐</div>` : `
+        <div class="nps-stars" id="stars-${id}">
+          ${[...Array(10)].map((_,i) => `<div class="star" onclick="selectStar('${id}',${i+1})" id="star-${id}-${i+1}">${i+1}</div>`).join('')}
+        </div>
+        <textarea class="nps-comment-input" id="comment-${id}" placeholder="Comentario opcional..." rows="2"></textarea>
+        <button class="btn-submit-nps" onclick="submitNPS('${id}')">Enviar evaluación</button>
+      `}
+      ${avgScore ? `<div style="margin-top:10px;font-size:11px;color:var(--text-muted)">Promedio: <strong style="color:var(--orange)">${avgScore}/10</strong> (${Object.keys(s.scores||{}).length} votos)</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+window.selectStar = function(sessionId, score) {
+  for(let i=1;i<=10;i++) {
+    const s = document.getElementById(`star-${sessionId}-${i}`);
+    if(s) s.classList.toggle('selected', i <= score);
+  }
+  document.getElementById(`stars-${sessionId}`).dataset.selected = score;
+};
+
+window.submitNPS = async function(sessionId) {
+  const starsEl = document.getElementById(`stars-${sessionId}`);
+  const score = parseInt(starsEl.dataset.selected);
+  if (!score) { showToast('Selecciona una puntuación'); return; }
+  const comment = document.getElementById(`comment-${sessionId}`).value.trim();
+  const userId = currentUser?.phone || 'guest_' + Date.now();
+  await set(ref(db, `nps_sessions/${sessionId}/scores/${userId.replace(/[^a-zA-Z0-9]/g,'_')}`), score);
+  if (comment) await push(ref(db, `nps_sessions/${sessionId}/comments`), { comment, userId, createdAt: new Date().toISOString() });
+  localStorage.setItem('nps_' + sessionId, score);
+  showToast('✅ Evaluación enviada. ¡Gracias!');
+  renderNPS();
+};
+
+// ── ADMIN FUNCTIONS ──
+window.saveAnnouncement = async function() {
+  const title = document.getElementById('ann-title').value.trim();
+  const body = document.getElementById('ann-body').value.trim();
+  if (!title || !body) { showToast('Completa título y mensaje'); return; }
+  await push(ref(db, 'announcements'), {
+    title, body,
+    pinned: document.getElementById('ann-pinned').checked,
+    createdAt: new Date().toISOString()
+  });
+  document.getElementById('ann-title').value = '';
+  document.getElementById('ann-body').value = '';
+  document.getElementById('ann-pinned').checked = false;
+  showToast('✅ Anuncio publicado');
+  loadAdminAnnouncements();
+};
+
+window.saveLink = async function() {
+  const name = document.getElementById('link-name').value.trim();
+  const url = document.getElementById('link-url').value.trim();
+  if (!name || !url) { showToast('Nombre y URL son obligatorios'); return; }
+  await push(ref(db, 'links'), {
+    name, url,
+    emoji: document.getElementById('link-emoji').value.trim() || '🔗',
+    desc: document.getElementById('link-desc').value.trim(),
+    createdAt: new Date().toISOString()
+  });
+  document.getElementById('link-name').value = '';
+  document.getElementById('link-url').value = '';
+  document.getElementById('link-emoji').value = '';
+  document.getElementById('link-desc').value = '';
+  showToast('✅ Link guardado');
+  loadAdminLinks();
+};
+
+window.saveLeaderboardEntry = async function() {
+  const name = document.getElementById('lb-name').value.trim();
+  const gmv = document.getElementById('lb-gmv').value.trim();
+  const pos = parseInt(document.getElementById('lb-pos').value);
+  if (!name || !gmv || !pos) { showToast('Completa todos los campos'); return; }
+  await push(ref(db, 'leaderboard'), {
+    name, gmv, pos,
+    country: document.getElementById('lb-country').value.trim(),
+    updatedAt: new Date().toISOString()
+  });
+  document.getElementById('lb-name').value = '';
+  document.getElementById('lb-gmv').value = '';
+  document.getElementById('lb-pos').value = '';
+  document.getElementById('lb-country').value = '';
+  showToast('✅ Posición guardada');
+  loadAdminLeaderboard();
+};
+
+window.saveNPSSession = async function() {
+  const name = document.getElementById('nps-session-name').value.trim();
+  const date = document.getElementById('nps-session-date').value;
+  if (!name || !date) { showToast('Completa nombre y fecha'); return; }
+  await push(ref(db, 'nps_sessions'), { name, date, createdAt: new Date().toISOString() });
+  document.getElementById('nps-session-name').value = '';
+  document.getElementById('nps-session-date').value = '';
+  showToast('✅ Sesión creada');
+  loadAdminNPS();
+};
+
+window.deleteEntry = async function(path) {
+  if (!confirm('¿Eliminar este elemento?')) return;
+  await remove(ref(db, path));
+  showToast('Eliminado');
+  loadAdminData();
+};
+
+function loadAdminData() {
+  loadAdminAnnouncements();
+  loadAdminLinks();
+  loadAdminLeaderboard();
+  loadAdminNPS();
+  loadAdminMembers();
+}
+
+function loadAdminAnnouncements() {
+  onValue(ref(db, 'announcements'), snap => {
+    const data = snap.val() || {};
+    const list = document.getElementById('admin-ann-list');
+    const entries = Object.entries(data).sort((a,b) => new Date(b[1].createdAt)-new Date(a[1].createdAt));
+    list.innerHTML = entries.map(([id,a]) => `
+      <div class="card" style="margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+        <div>
+          <div style="font-weight:600;margin-bottom:4px">${a.pinned?'⭐ ':''} ${a.title}</div>
+          <div style="font-size:12px;color:var(--text-dim)">${a.body.substring(0,80)}...</div>
+        </div>
+        <button class="btn-danger" onclick="deleteEntry('announcements/${id}')">Eliminar</button>
+      </div>
+    `).join('') || '<p style="color:var(--text-muted);font-size:13px">Sin anuncios aún</p>';
+  }, { onlyOnce: true });
+}
+
+function loadAdminLinks() {
+  onValue(ref(db, 'links'), snap => {
+    const data = snap.val() || {};
+    const list = document.getElementById('admin-links-list');
+    list.innerHTML = Object.entries(data).map(([id,l]) => `
+      <div class="card" style="margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:22px">${l.emoji}</span>
+          <div><div style="font-weight:600">${l.name}</div><div style="font-size:11px;color:var(--text-dim)">${l.url}</div></div>
+        </div>
+        <button class="btn-danger" onclick="deleteEntry('links/${id}')">Eliminar</button>
+      </div>
+    `).join('') || '<p style="color:var(--text-muted);font-size:13px">Sin links aún</p>';
+  }, { onlyOnce: true });
+}
+
+function loadAdminLeaderboard() {
+  onValue(ref(db, 'leaderboard'), snap => {
+    const data = snap.val() || {};
+    const tbody = document.getElementById('admin-lb-body');
+    const entries = Object.entries(data).sort((a,b) => a[1].pos - b[1].pos);
+    tbody.innerHTML = entries.map(([id,e]) => `
+      <tr>
+        <td>${e.pos}</td><td>${e.name}</td><td>${e.country||''}</td><td style="color:var(--orange);font-weight:600">$${e.gmv}</td>
+        <td><button class="btn-danger" onclick="deleteEntry('leaderboard/${id}')">✕</button></td>
+      </tr>
+    `).join('') || '<tr><td colspan="5" style="color:var(--text-muted)">Sin datos</td></tr>';
+  }, { onlyOnce: true });
+}
+
+function loadAdminNPS() {
+  onValue(ref(db, 'nps_sessions'), snap => {
+    const data = snap.val() || {};
+    const div = document.getElementById('admin-nps-results');
+    div.innerHTML = Object.entries(data).map(([id,s]) => {
+      const scores = s.scores ? Object.values(s.scores) : [];
+      const avg = scores.length ? (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1) : 'Sin votos';
+      return `<div class="card" style="margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-weight:600">${s.name}</div>
+          <div style="font-size:12px;color:var(--text-dim)">${s.date} · ${scores.length} votos · Promedio: <span style="color:var(--orange)">${avg}</span></div>
+        </div>
+        <button class="btn-danger" onclick="deleteEntry('nps_sessions/${id}')">Eliminar</button>
+      </div>`;
+    }).join('') || '<p style="color:var(--text-muted);font-size:13px">Sin sesiones creadas</p>';
+  }, { onlyOnce: true });
+}
+
+function loadAdminMembers() {
+  onValue(ref(db, 'members'), snap => {
+    const data = snap.val() || {};
+    const tbody = document.getElementById('admin-members-body');
+    tbody.innerHTML = Object.entries(data).map(([id,m]) => `
+      <tr>
+        <td style="font-weight:500">${m.name}</td>
+        <td>${m.country||''}</td>
+        <td style="color:var(--orange)">${m.skill||''}</td>
+        <td>${m.phone||''}</td>
+        <td>${m.email||''}</td>
+        <td><button class="btn-danger" onclick="deleteEntry('members/${id}')">✕</button></td>
+      </tr>
+    `).join('') || '<tr><td colspan="6" style="color:var(--text-muted)">Sin miembros</td></tr>';
+  }, { onlyOnce: true });
+}
+
+// ── EXPOSE GLOBALS ──
+window.switchTab = switchTab;
+window.switchAdminTab = switchAdminTab;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.showScreen = showScreen;
+
+// ── AUTO LOGIN ──
+const saved = localStorage.getItem('nova30_user');
+if (saved) {
+  currentUser = JSON.parse(saved);
+  document.getElementById('nav-user-label').textContent = currentUser.phone;
+  showScreen('screen-app');
+  loadAllData();
+}
+</script>
+</body>
+</html>
