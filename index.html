@@ -65,13 +65,10 @@
       z-index: 1;
     }
     .login-logo {
-      background: #000;
-      border-radius: 12px;
-      padding: 20px 24px;
       margin-bottom: 32px;
       display: inline-block;
     }
-    .login-logo svg { width: 180px; height: auto; }
+    .login-logo svg { width: 220px; height: auto; }
     .login-box h2 {
       font-family: var(--font-display);
       font-size: 28px;
@@ -152,7 +149,6 @@
       height: 56px;
     }
     .nav-logo {
-      background: #000;
       padding: 8px 16px 8px 0;
       border-right: 1px solid var(--border);
       margin-right: 8px;
@@ -826,6 +822,30 @@
       .nav { padding: 0 16px; }
       .login-box { padding: 36px 24px; }
     }
+
+    /* NPS inline button */
+    .btn-nps-inline {
+      background: transparent;
+      border: 1px solid rgba(255,64,2,0.4);
+      color: var(--orange);
+      border-radius: 7px;
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: all 0.2s;
+      width: 100%;
+    }
+    .btn-nps-inline:hover { background: var(--orange-dim); border-color: var(--orange); }
+
+    /* Fade in */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .screen.active .content { animation: fadeUp 0.35s ease; }
+    .login-box { animation: fadeUp 0.4s ease; }
   </style>
 </head>
 <body>
@@ -1303,11 +1323,16 @@ function renderAgenda() {
   grid.innerHTML = AGENDA.map(e => {
     const tag = TAG_MAP[e.type] || TAG_MAP.digital;
     const cls = e.past ? 'past' : (e.next ? 'next' : '');
+    // Show NPS button for past events and the next one (already happened or happening)
+    const showNPS = e.past || e.next;
     return `<div class="agenda-card ${cls}">
-      <div><span class="agenda-tag ${tag.cls}">${tag.label}</span>${e.next ? '<span class="next-badge">PRÓXIMO</span>' : ''}</div>
+      <div><span class="agenda-tag ${tag.cls}">${tag.label}</span>${e.next ? '<span class="next-badge">PRÓXIMO</span>' : ''}${e.past ? '<span class="next-badge" style="background:rgba(255,255,255,0.1);color:var(--text-muted)">PASADO</span>' : ''}</div>
       <div class="agenda-title">${e.title}</div>
       <div class="agenda-date">${e.date}</div>
       <div class="agenda-desc">${e.desc}</div>
+      ${showNPS ? `<div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
+        <button class="btn-nps-inline" onclick="goToNPS('${e.title}')">⭐ Evaluar esta sesión</button>
+      </div>` : ''}
     </div>`;
   }).join('');
 
@@ -1321,9 +1346,31 @@ function renderAgenda() {
         <div class="agenda-title">${next.title}</div>
         <div class="agenda-date">${next.date}</div>
         <div class="agenda-desc">${next.desc}</div>
+        <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
+          <button class="btn-nps-inline" onclick="goToNPS('${next.title}')">⭐ Evaluar esta sesión</button>
+        </div>
       </div>`;
   }
 }
+
+window.goToNPS = function(sessionTitle) {
+  // Switch to NPS tab
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-nps').classList.add('active');
+  document.querySelectorAll('.nav-tab')[5].classList.add('active');
+  // Highlight matching session if exists
+  setTimeout(() => {
+    const cards = document.querySelectorAll('.nps-card');
+    cards.forEach(c => {
+      if (c.querySelector('h3')?.textContent.toLowerCase().includes(sessionTitle.toLowerCase().substring(0,15))) {
+        c.style.borderColor = 'var(--orange)';
+        c.style.boxShadow = '0 0 20px var(--orange-glow)';
+        c.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+  }, 100);
+};
 
 // ── MEMBERS ──
 function loadMembers() {
@@ -1412,30 +1459,56 @@ function loadLeaderboard() {
   });
 }
 
+// Top 3 hardcoded del Reto NOVA (se actualiza desde admin para el resto)
+const RETO_TOP3 = [
+  { name: 'ELEIA',            pos: 1, country: '🇲🇽' },
+  { name: 'EKPA',             pos: 2, country: '🇲🇽' },
+  { name: 'Mis propias finanzas', pos: 3, country: '🇲🇽' },
+];
+
 function renderLeaderboard() {
   const container = document.getElementById('leaderboard-container');
-  const entries = Object.entries(leaderboardData).sort((a,b) => (a[1].pos||99) - (b[1].pos||99));
-  if (!entries.length) {
-    container.innerHTML = `<div class="empty-state"><div class="emoji">🏆</div><p>La tabla de posiciones será publicada pronto</p></div>`;
-    return;
-  }
-  const top3 = entries.slice(0,3);
-  const rest = entries.slice(3);
-  let html = `<div class="stats-bar" style="grid-template-columns:repeat(3,1fr)">`;
-  const medals = ['🥇','🥈','🥉'];
-  top3.forEach(([id,e],i) => {
-    html += `<div class="stat-card" style="text-align:center">
-      <div style="font-size:28px;margin-bottom:4px">${medals[i]}</div>
-      <div style="font-size:14px;font-weight:600;margin-bottom:4px">${e.name}</div>
-      <div style="font-size:11px;color:var(--text-dim);margin-bottom:6px">${e.country||''}</div>
-      <div class="stat-value" style="font-size:20px">$${e.gmv}</div>
-    </div>`;
+  const dbEntries = Object.entries(leaderboardData).sort((a,b) => (a[1].pos||99) - (b[1].pos||99));
+
+  // Podio top 3 siempre visible (hardcoded)
+  const podiumOrder = [RETO_TOP3[1], RETO_TOP3[0], RETO_TOP3[2]]; // plata, oro, bronce
+  const podiumStyles = [
+    { medal:'🥈', height:'100px', border:'#C0C0C0', size:'56px', fontSize:'15px', labelColor:'#C0C0C0' },
+    { medal:'🥇', height:'130px', border:'#FFD700', size:'72px', fontSize:'18px', labelColor:'#FFD700' },
+    { medal:'🥉', height:'80px',  border:'#CD7F32', size:'48px', fontSize:'13px', labelColor:'#CD7F32' },
+  ];
+
+  let html = `
+    <div style="text-align:center;margin-bottom:8px">
+      <span style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--orange)">— LÍDERES DEL RETO —</span>
+    </div>
+    <div style="display:flex;justify-content:center;align-items:flex-end;gap:12px;margin-bottom:28px;padding:24px 0 0">
+  `;
+
+  podiumOrder.forEach((e, i) => {
+    const s = podiumStyles[i];
+    html += `
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;max-width:200px">
+        <div style="font-size:28px">${s.medal}</div>
+        <div style="width:${s.size};height:${s.size};border-radius:50%;background:var(--bg3);border:3px solid ${s.border};display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 20px ${s.border}44">⭐</div>
+        <div style="font-size:${s.fontSize};font-weight:700;color:${s.labelColor};text-align:center;font-family:var(--font-display);letter-spacing:1px">${e.name}</div>
+        <div style="font-size:11px;color:var(--text-dim)">${e.country}</div>
+        <div style="background:var(--bg2);border:1px solid ${s.border}44;border-bottom:3px solid ${s.border};border-radius:8px 8px 0 0;width:100%;height:${s.height};display:flex;align-items:center;justify-content:center">
+          <span style="font-family:var(--font-display);font-size:22px;color:${s.labelColor}">#${e.pos}</span>
+        </div>
+      </div>`;
   });
+
   html += `</div>`;
-  if (rest.length) {
-    html += `<div class="leaderboard-table">
-      <div class="lb-row header"><div>#</div><div>Creador</div><div>País</div><div>GMV</div></div>`;
-    rest.forEach(([id,e]) => {
+
+  // Resto desde Firebase
+  if (dbEntries.length) {
+    html += `
+      <div style="margin-top:4px">
+        <div style="font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;padding:0 4px">TABLA COMPLETA</div>
+        <div class="leaderboard-table">
+          <div class="lb-row header"><div>#</div><div>Creador</div><div>País</div><div>GMV</div></div>`;
+    dbEntries.forEach(([id,e]) => {
       html += `<div class="lb-row">
         <div class="lb-pos ${e.pos<=3?'top3':''}">${e.pos}</div>
         <div><div class="lb-name">${e.name}</div></div>
@@ -1443,8 +1516,11 @@ function renderLeaderboard() {
         <div class="lb-gmv">$${e.gmv}</div>
       </div>`;
     });
-    html += `</div>`;
+    html += `</div></div>`;
+  } else {
+    html += `<div style="text-align:center;padding:20px;font-size:12px;color:var(--text-muted)">El admin publicará la tabla completa próximamente</div>`;
   }
+
   container.innerHTML = html;
 }
 
