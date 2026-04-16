@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hotmart Boost · Dynamis Pocket</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --fire: #FC3F03;
+      --fire-soft: rgba(252,63,3,0.1);
+      --fire-border: rgba(252,63,3,0.2);
+      --bg: #f5f3f0;
+      --bg2: #ffffff;
+      --bg3: #eeebe7;
+      --ink: #111111;
+      --ink-mid: rgba(17,17,17,0.5);
+      --ink-faint: rgba(17,17,17,0.12);
+      --r: 12px;
+      --font-head: 'Syne', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--ink); font-family: var(--font-body); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    .screen { display: none; min-height: 100vh; flex-direction: column; }
+    .screen.active { display: flex; }
+
+    /* LOGIN */
+    #screen-login { align-items: center; justify-content: center; background: var(--ink); position: relative; overflow: hidden; }
+    #screen-login::before { content: 'BOOST'; position: absolute; font-family: var(--font-head); font-weight: 800; font-size: clamp(100px, 22vw, 240px); color: rgba(255,255,255,0.03); letter-spacing: -8px; top: 50%; left: 50%; transform: translate(-50%,-50%); pointer-events: none; white-space: nowrap; }
+    .login-wrap { position: relative; z-index: 1; width: 100%; max-width: 380px; padding: 20px; }
+    .login-logo-area { margin-bottom: 32px; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+    .login-logo-area svg { width: 140px; }
+    .login-subtitle { font-family: var(--font-head); font-size: 10px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: var(--fire); border-left: 2px solid var(--fire); padding-left: 8px; }
+    .login-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--r); padding: 32px; }
+    .login-card h2 { font-family: var(--font-head); font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 6px; letter-spacing: -0.5px; }
+    .login-card p { font-size: 13px; color: rgba(255,255,255,0.4); margin-bottom: 24px; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 10px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 7px; }
+    .field input { width: 100%; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; padding: 13px 16px; color: #fff; font-family: var(--font-body); font-size: 14px; outline: none; transition: border-color 0.2s; }
+    .field input:focus { border-color: var(--fire); }
+    .field input::placeholder { color: rgba(255,255,255,0.2); }
+    .btn-enter { width: 100%; background: var(--fire); color: #fff; border: none; border-radius: 8px; padding: 14px; font-family: var(--font-head); font-size: 16px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: opacity 0.2s, transform 0.15s; }
+    .btn-enter:hover { opacity: 0.88; transform: translateY(-1px); }
+    .login-error { font-size: 12px; color: var(--fire); margin-bottom: 12px; display: none; }
+    .login-guest { text-align: center; margin-top: 14px; font-size: 12px; color: rgba(255,255,255,0.25); cursor: pointer; transition: color 0.2s; }
+    .login-guest:hover { color: rgba(255,255,255,0.5); }
+
+    /* NAV */
+    .nav { background: var(--ink); position: sticky; top: 0; z-index: 100; display: flex; align-items: center; height: 52px; padding: 0 20px; gap: 0; }
+    .nav-logo { display: flex; align-items: center; padding-right: 14px; border-right: 1px solid rgba(255,255,255,0.08); margin-right: 10px; flex-shrink: 0; cursor: pointer; }
+    .nav-logo svg { width: 76px; }
+    .nav-pill { font-family: var(--font-head); font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--fire); background: rgba(252,63,3,0.12); border: 1px solid rgba(252,63,3,0.2); border-radius: 100px; padding: 3px 10px; margin-right: 14px; flex-shrink: 0; }
+    .nav-tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; flex: 1; }
+    .nav-tabs::-webkit-scrollbar { display: none; }
+    .nav-tab { padding: 7px 14px; font-family: var(--font-body); font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.3); border: none; background: none; border-radius: 6px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+    .nav-tab:hover { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.05); }
+    .nav-tab.active { color: #fff; background: rgba(255,255,255,0.08); }
+    .nav-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .nav-user { font-size: 11px; color: rgba(255,255,255,0.2); }
+    .btn-out { font-size: 11px; color: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.1); background: none; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-family: var(--font-body); transition: all 0.15s; }
+    .btn-out:hover { color: rgba(255,255,255,0.6); }
+
+    /* CONTENT */
+    .content { flex: 1; max-width: 680px; margin: 0 auto; width: 100%; padding: 40px 20px 60px; animation: up 0.3s ease; }
+    @keyframes up { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* PAGE HEADER */
+    .page-header { margin-bottom: 28px; }
+    .overline { font-size: 10px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--fire); margin-bottom: 8px; }
+    .page-header h1 { font-family: var(--font-head); font-size: 38px; font-weight: 800; letter-spacing: -1.5px; line-height: 1; margin-bottom: 8px; }
+    .page-header p { font-size: 14px; color: var(--ink-mid); }
+
+    /* SCHEDULE */
+    .schedule { position: relative; }
+    .schedule::before { content:''; position: absolute; left: 47px; top:0; bottom:0; width:1px; background: var(--ink-faint); }
+    .sch-item { display: grid; grid-template-columns: 48px 1fr; gap: 0; margin-bottom: 4px; position: relative; }
+    .sch-time { font-family: var(--font-head); font-size: 12px; font-weight: 600; color: var(--ink-mid); padding-top: 15px; text-align: right; padding-right: 14px; }
+    .sch-item::after { content:''; position: absolute; left: 44px; top: 19px; width: 7px; height: 7px; border-radius: 50%; background: var(--ink-faint); border: 2px solid var(--bg); z-index: 1; }
+    .sch-item.t-break::after, .sch-item.t-cierre::after { background: var(--ink); }
+    .sch-item.t-hotseat::after, .sch-item.t-highlight::after { background: var(--fire); }
+    .sch-card { background: var(--bg2); border: 1px solid var(--ink-faint); border-radius: var(--r); padding: 14px 18px; margin-left: 14px; transition: box-shadow 0.15s; }
+    .sch-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+    .sch-item.t-break .sch-card, .sch-item.t-cierre .sch-card { background: var(--ink); border-color: var(--ink); }
+    .sch-item.t-break .sch-title, .sch-item.t-cierre .sch-title { color: #fff; text-align: center; }
+    .sch-item.t-hotseat .sch-card, .sch-item.t-highlight .sch-card { background: var(--fire); border-color: var(--fire); }
+    .sch-item.t-hotseat .sch-title, .sch-item.t-highlight .sch-title { color: #fff; }
+    .sch-item.t-hotseat .sch-speaker, .sch-item.t-highlight .sch-speaker { color: rgba(255,255,255,0.65); }
+    .sch-item.t-hotseat .sch-time, .sch-item.t-highlight .sch-time { color: var(--fire); }
+    .sch-title { font-family: var(--font-head); font-size: 14px; font-weight: 700; color: var(--ink); line-height: 1.35; letter-spacing: -0.2px; }
+    .sch-speaker { font-size: 12px; color: var(--ink-mid); margin-top: 3px; }
+
+    /* MEMBERS */
+    .mem-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+    .mem-count { font-family: var(--font-head); font-size: 13px; font-weight: 700; color: var(--ink-mid); }
+    .mem-count strong { color: var(--fire); font-size: 20px; }
+    .btn-add { background: var(--ink); color: #fff; border: none; border-radius: 8px; padding: 10px 18px; font-family: var(--font-head); font-size: 13px; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: opacity 0.15s; }
+    .btn-add:hover { opacity: 0.7; }
+    .mem-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(195px, 1fr)); gap: 10px; }
+    .mem-card { background: var(--bg2); border: 1px solid var(--ink-faint); border-radius: var(--r); padding: 18px; transition: all 0.2s; }
+    .mem-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+    .mem-avatar { width: 38px; height: 38px; border-radius: 9px; background: var(--fire-soft); border: 1px solid var(--fire-border); display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 13px; font-weight: 800; color: var(--fire); margin-bottom: 11px; }
+    .mem-name { font-family: var(--font-head); font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+    .mem-skill { font-size: 11px; font-weight: 500; color: var(--fire); margin-bottom: 4px; }
+    .mem-country { font-size: 11px; color: var(--ink-mid); margin-bottom: 8px; }
+    .mem-links { display: flex; gap: 8px; flex-wrap: wrap; }
+    .mem-link { font-size: 11px; color: var(--ink-mid); text-decoration: none; transition: color 0.15s; }
+    .mem-link:hover { color: var(--fire); }
+    .mem-challenge { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--ink-faint); font-size: 11px; color: var(--ink-mid); font-style: italic; line-height: 1.5; }
+    .empty-state { grid-column: 1/-1; text-align: center; padding: 56px 20px; color: var(--ink-mid); }
+    .empty-state .icon { font-size: 32px; margin-bottom: 10px; }
+
+    /* EVAL */
+    .eval-banner { background: var(--ink); border-radius: var(--r); padding: 24px 28px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .eval-banner h3 { font-family: var(--font-head); font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.5px; margin-bottom: 4px; }
+    .eval-banner p { font-size: 13px; color: rgba(255,255,255,0.4); }
+    .eval-icon { font-size: 40px; }
+    .tf-wrap { background: var(--bg2); border: 1px solid var(--ink-faint); border-radius: var(--r); overflow: hidden; }
+    .tf-wrap iframe { display: block; width: 100%; height: 580px; border: none; }
+
+    /* MODAL */
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(6px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .overlay.open { display: flex; }
+    .modal { background: var(--bg2); border: 1px solid var(--ink-faint); border-radius: 16px; padding: 28px; width: 100%; max-width: 440px; max-height: 88vh; overflow-y: auto; }
+    .modal-title { font-family: var(--font-head); font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 20px; }
+    .modal-title span { color: var(--fire); }
+    .fg { margin-bottom: 13px; }
+    .fl { display: block; font-size: 10px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ink-mid); margin-bottom: 6px; }
+    .fi { width: 100%; background: var(--bg); border: 1px solid var(--ink-faint); border-radius: 8px; padding: 11px 14px; color: var(--ink); font-family: var(--font-body); font-size: 13px; outline: none; transition: border-color 0.2s; }
+    .fi:focus { border-color: var(--fire); }
+    .fta { width: 100%; background: var(--bg); border: 1px solid var(--ink-faint); border-radius: 8px; padding: 11px 14px; color: var(--ink); font-family: var(--font-body); font-size: 13px; outline: none; resize: none; min-height: 68px; transition: border-color 0.2s; }
+    .fta:focus { border-color: var(--fire); }
+    .fr { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (max-width: 440px) { .fr { grid-template-columns: 1fr; } }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+    .btn-cancel { background: none; border: 1px solid var(--ink-faint); color: var(--ink-mid); border-radius: 8px; padding: 10px 16px; font-family: var(--font-body); font-size: 13px; cursor: pointer; }
+    .btn-save { background: var(--ink); color: #fff; border: none; border-radius: 8px; padding: 10px 20px; font-family: var(--font-head); font-size: 14px; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: opacity 0.15s; }
+    .btn-save:hover { opacity: 0.7; }
+
+    /* ADMIN */
+    #screen-admin-login { align-items: center; justify-content: center; background: var(--ink); }
+    #screen-admin { flex-direction: column; background: var(--bg); }
+    .adm-nav { background: var(--ink); border-bottom: 1px solid rgba(255,255,255,0.08); padding: 14px 24px; display: flex; align-items: center; gap: 12px; }
+    .adm-nav-title { font-family: var(--font-head); font-size: 15px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--fire); }
+    .adm-nav-right { margin-left: auto; display: flex; gap: 8px; }
+    .adm-body { padding: 28px 24px; max-width: 780px; margin: 0 auto; width: 100%; }
+    .adm-tabs { display: flex; gap: 2px; margin-bottom: 22px; border-bottom: 1px solid var(--ink-faint); }
+    .adm-tab { padding: 9px 16px; font-family: var(--font-body); font-size: 13px; font-weight: 500; color: var(--ink-mid); cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
+    .adm-tab.active { color: var(--fire); border-bottom-color: var(--fire); }
+    .adm-section { display: none; }
+    .adm-section.active { display: block; }
+    .card { background: var(--bg2); border: 1px solid var(--ink-faint); border-radius: var(--r); padding: 20px; margin-bottom: 10px; }
+    .btn-danger { background: none; color: #e53e3e; border: 1px solid rgba(229,62,62,0.25); border-radius: 5px; padding: 5px 10px; font-size: 11px; cursor: pointer; font-family: var(--font-body); }
+    .adm-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .adm-table th { text-align: left; padding: 8px 12px; font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-mid); border-bottom: 1px solid var(--ink-faint); }
+    .adm-table td { padding: 11px 12px; border-bottom: 1px solid rgba(0,0,0,0.04); vertical-align: middle; }
+
+    /* TOAST */
+    #toast { position: fixed; bottom: 24px; right: 24px; background: var(--ink); color: #fff; border-left: 3px solid var(--fire); padding: 12px 18px; border-radius: 8px; font-size: 13px; z-index: 9999; transform: translateY(60px); opacity: 0; transition: all 0.25s; }
+    #toast.show { transform: translateY(0); opacity: 1; }
+
+    @media (max-width: 600px) {
+      .content { padding: 24px 14px 48px; }
+      .page-header h1 { font-size: 28px; }
+      .eval-banner { padding: 18px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="screen-login" class="screen active">
+  <div class="login-wrap">
+    <div class="login-logo-area">
+      <svg viewBox="0 0 155.55 82.76" xmlns="http://www.w3.org/2000/svg">
+        <defs><style>.l1{fill:#fc3f03}.l2{fill:#fff}</style></defs>
+        <path class="l2" d="M26.06,23.67h3.01c.07,0,.13-.06.13-.13v-5.67c0-1.55.8-2.41,1.98-2.41,1.24,0,1.69.84,1.69,2.26v5.81c0,.07.06.13.13.13h3.01c.07,0,.13-.06.13-.13v-6.65c0-2.35-1-4.04-3.67-4.04-1.67,0-2.71.86-3.24,1.75v-5.1c0-.07-.06-.13-.13-.13h-3.04c-.07,0-.13.06-.13.13v14.03c0,.07.06.13.13.13h0ZM42.79,23.93c3.33,0,5.53-2.24,5.53-5.45v-.2c0-3.18-2.2-5.43-5.53-5.43s-5.53,2.24-5.53,5.43v.2c0,3.2,2.18,5.45,5.53,5.45ZM42.79,21.3c-1.43,0-2.22-1.04-2.22-2.92s.8-2.9,2.22-2.9,2.22,1.04,2.22,2.9-.8,2.92-2.22,2.92ZM54.07,23.81c.64,0,1.38-.11,1.94-.24.06-.01.09-.06.09-.12v-2.16c0-.08-.08-.14-.16-.12-.31.08-.67.16-1.09.16-1.04,0-1.43-.35-1.43-1.18v-4.28h2.57s.06-.03.06-.06v-2.61s-.03-.06-.06-.06h-2.57v-3.67s-.03-.06-.06-.06h-3.15s-.06.03-.06.06v3.67h-1.55s-.06.03-.06.06v2.61s.03.06.06.06h1.55v4.51c0,2.26,1.22,3.45,3.9,3.45M57.46,23.67h3.01c.07,0,.13-.06.13-.13v-5.57c0-1.75.73-2.53,1.86-2.53,1.04,0,1.53.73,1.53,2.16v5.93c0,.07.06.13.13.13h3.01c.07,0,.13-.06.13-.13v-5.55c0-1.73.67-2.55,1.82-2.55,1.02,0,1.57.69,1.57,2.14v5.95c0,.07.06.13.13.13h3.01c.07,0,.13-.06.13-.13v-6.57c0-2.45-1.02-4.12-3.61-4.12-1.53,0-2.67.75-3.41,1.96-.53-1.35-1.61-1.96-3.18-1.96s-2.67.96-3.16,1.88l-.08-1.49c0-.07-.06-.12-.12-.12h-2.88c-.07,0-.13.06-.13.13v10.3c0,.07.06.13.13.13h0ZM78.55,23.93c1.53,0,2.61-.65,3.31-1.8l.13,1.42c0,.06.06.11.12.11h2.72c.07,0,.13-.06.13-.13v-7.1c0-2.2-1.8-3.59-4.67-3.59s-4.65,1.21-4.9,3.25c0,.07.05.14.12.14h2.84c.06,0,.11-.04.12-.1.17-.63.72-.96,1.73-.96,1.06,0,1.57.47,1.57,1.24v1.16c-.65-.31-1.51-.45-2.33-.45-2.73,0-4.53,1.41-4.53,3.51,0,1.98,1.53,3.28,3.63,3.28M79.7,21.59c-1.04,0-1.63-.49-1.63-1.22s.61-1.28,1.96-1.28c.59,0,1.14.1,1.75.33v.45c0,1.04-.88,1.73-2.08,1.73M86.41,23.67h3.01c.07,0,.13-.06.13-.13v-5.02c0-1.73.86-2.67,2.77-2.67h.55c.07,0,.13-.06.13-.13v-2.55c0-.07-.06-.13-.13-.13h-.47c-1.55,0-2.41.61-2.94,1.96l-.02-1.77c0-.07-.06-.12-.13-.12h-2.91c-.07,0-.13.06-.13.13v10.3c0,.07.06.13.13.13h0ZM99.61,23.81c.64,0,1.38-.11,1.94-.24.06-.01.1-.06.1-.12v-2.16c0-.08-.08-.14-.16-.12-.31.08-.67.16-1.09.16-1.04,0-1.43-.35-1.43-1.18v-4.28h2.51c.07,0,.13-.06.13-.13v-2.48c0-.07-.06-.13-.13-.13h-2.51v-3.61c0-.07-.06-.13-.13-.13h-3.01c-.07,0-.13.06-.13.13v3.61h-1.49c-.07,0-.13.06-.13.13v2.48c0,.07.06.13.13.13h1.49v4.51c0,2.26,1.22,3.45,3.9,3.45"/>
+        <path class="l1" d="M20.3,13.68c-.37-1.33-.92-2.63-1.69-3.91,0,0-.73-1.21-1.04-1.58-.07-.09-.23.01-.17.12.09.18.17.4.11.62-.09.26-.38.45-.66.35-.07-.03-.14-.07-.2-.14-.28-.29-.42-.76-.6-1.37-.16-.54-.36-1.21-.73-1.93-.59-1.17-1.29-1.72-1.31-1.74-.03-.03-.08-.03-.12,0-.04.03-.05.07-.04.12,0,.01.3.98-.27,1.71-.22.29-.57.47-.97.49-.4.02-.8-.11-1.04-.35-.59-.59-.66-1.65-.65-2.22.04-1.92.62-3.26.92-3.7.03-.04.03-.09,0-.13-.03-.04-.08-.05-.12-.03-2.34,1.02-4.04,2.75-4.9,5.02-.49,1.35-.7,1.96-.87,2.35-.16.35-.31.52-.46.61-.08.05-.18.08-.29.08-.15-.02-.91-.16-.25-1.42.06-.11-.09-.21-.17-.13l-.52.57-.28.3-.34.38c-.06.07-.11.13-.16.2-1.64,1.87-2.78,4.26-3.44,6.47C.03,15.91,0,17.61,0,18.26v.14C0,21.26,1.09,23.95,3.07,25.97c1.98,2.02,4.6,3.14,7.4,3.14s5.42-1.11,7.4-3.14c1.98-2.02,3.07-4.71,3.07-7.57,0-1.82-.23-3.31-.63-4.73M10.46,23.94c-2.99,0-5.42-2.48-5.42-5.54s2.42-5.54,5.42-5.54,5.42,2.48,5.42,5.54-2.42,5.54-5.42,5.54Z"/>
+        <g><path class="l2" d="M0,82.07v-44.47h18.22c4.4,0,7.98.99,10.64,2.95,2.83,2.09,4.27,5.18,4.27,9.2v.63c0,2.34-.63,4.41-1.87,6.16-.49.7-1.05,1.32-1.67,1.88,1.1.72,2.07,1.62,2.9,2.67,1.6,2.04,2.41,4.46,2.41,7.22v.69c0,4.06-1.49,7.32-4.44,9.67-2.82,2.25-6.49,3.39-10.92,3.39H0ZM19.03,73.41c1.99,0,3.54-.44,4.62-1.32.99-.8,1.45-1.87,1.45-3.37v-.69c0-1.49-.44-2.52-1.38-3.27-1.04-.83-2.64-1.25-4.75-1.25h-9.33v9.9h9.39ZM17.65,54.96c2,0,3.5-.38,4.45-1.12.52-.41,1.22-1.16,1.22-2.94v-.57c0-2.01-.69-4.06-5.84-4.06h-7.84v8.7h8.01Z"/><path class="l2" d="M52.77,82.76c-3.19,0-6.04-.71-8.48-2.11-2.47-1.42-4.4-3.45-5.75-6.04-1.32-2.53-1.99-5.46-1.99-8.7v-.92c0-3.27.67-6.22,1.99-8.75,1.35-2.59,3.28-4.62,5.75-6.04,2.44-1.4,5.29-2.11,8.48-2.11s6.05.72,8.49,2.15c2.46,1.44,4.39,3.48,5.74,6.06,1.32,2.54,1.99,5.46,1.99,8.7v.92c0,3.27-.67,6.21-1.99,8.73-1.35,2.57-3.28,4.59-5.75,6-2.44,1.4-5.29,2.11-8.48,2.11ZM52.77,56.63c-2.09,0-3.66.7-4.82,2.15-1.24,1.56-1.88,3.8-1.88,6.66s.63,5.11,1.88,6.66c1.16,1.45,2.74,2.15,4.82,2.15s3.66-.7,4.82-2.15c1.24-1.56,1.88-3.8,1.88-6.66s-.63-5.15-1.87-6.69c-1.16-1.43-2.74-2.13-4.83-2.13Z"/><path class="l2" d="M86.91,82.76c-3.19,0-6.04-.71-8.48-2.11-2.47-1.42-4.4-3.45-5.75-6.04-1.32-2.53-1.99-5.46-1.99-8.7v-.92c0-3.27.67-6.22,1.99-8.75,1.35-2.59,3.28-4.62,5.75-6.04,2.44-1.4,5.29-2.11,8.48-2.11s6.05.72,8.49,2.15c2.46,1.44,4.39,3.48,5.74,6.06,1.32,2.54,1.99,5.46,1.99,8.7v.92c0,3.27-.67,6.21-1.99,8.73-1.35,2.57-3.28,4.59-5.75,6-2.44,1.4-5.29,2.11-8.48,2.11ZM86.91,56.63c-2.09,0-3.66.7-4.82,2.15-1.24,1.56-1.88,3.8-1.88,6.66s.63,5.11,1.88,6.66c1.16,1.45,2.74,2.15,4.82,2.15s3.66-.7,4.82-2.15c1.24-1.56,1.88-3.8,1.88-6.66s-.63-5.15-1.87-6.69c-1.16-1.43-2.74-2.13-4.83-2.13Z"/><path class="l2" d="M118.88,82.76c-4.11,0-7.51-.98-10.1-2.93-2.71-2.03-4.25-4.9-4.56-8.54l-.18-2.06h9.1l.23,1.63c.19,1.35.71,2.3,1.6,2.93.98.7,2.32,1.05,3.97,1.05s2.89-.3,3.75-.88c.66-.45.94-.99.94-1.81,0-.7-.23-1.11-.82-1.46-.66-.39-2.12-.98-5.3-1.54-3.94-.66-6.85-1.7-8.86-3.17-2.27-1.65-3.41-4.08-3.41-7.23,0-2.12.61-4.04,1.82-5.7,1.18-1.61,2.8-2.87,4.83-3.72,1.95-.82,4.18-1.24,6.64-1.24,3.88,0,7.07.93,9.48,2.76,2.5,1.91,3.96,4.61,4.32,8.04l.22,2.1h-9.11l-.25-1.6c-.19-1.18-.62-2-1.34-2.52-.79-.57-1.93-.87-3.38-.87-1.37,0-2.43.28-3.16.82-.59.44-.85.93-.85,1.63,0,.77.28,1.1.71,1.35.61.36,1.98.9,5.1,1.42,4.1.66,7.1,1.71,9.16,3.2,2.28,1.65,3.48,4.14,3.48,7.21,0,3.44-1.37,6.22-4.08,8.25-2.54,1.91-5.89,2.87-9.96,2.87Z"/><path class="l2" d="M148.95,82.76c-7.24,0-11.23-3.66-11.23-10.32v-15.58h-5.79v-8.03h5.79v-9.22h9.41v9.22h8.19v8.03h-8.19v15.06c0,.68.09,1.58.54,2.02.17.17.75.55,2.43.55,1.01,0,2.01-.16,2.95-.48l2.5-.83v8.47l-1.37.4c-1.62.47-3.38.7-5.22.7Z"/></g>
+      </svg>
+      <span class="login-subtitle">Dynamis Pocket</span>
+    </div>
+    <div class="login-card">
+      <h2>Acceso al evento</h2>
+      <p>Ingresa tu WhatsApp para entrar</p>
+      <div class="login-error" id="login-error">Ingresa un número válido</div>
+      <div class="field"><label>WhatsApp</label><input type="tel" id="login-phone" placeholder="+52 55 1234 5678"/></div>
+      <button class="btn-enter" onclick="handleLogin()">Entrar →</button>
+      <div class="login-guest" onclick="handleGuest()">Solo ver la agenda →</div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="screen-app" class="screen">
+  <nav class="nav">
+    <div class="nav-logo" onclick="showScreen('screen-admin-login')" title="Admin">
+      <svg viewBox="0 0 100 30" xmlns="http://www.w3.org/2000/svg"><text y="24" font-family="sans-serif" font-weight="800" font-size="22" fill="#FC3F03">boost</text></svg>
+    </div>
+    <span class="nav-pill">Dynamis Pocket</span>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="switchTab('agenda',this)">Agenda</button>
+      <button class="nav-tab" onclick="switchTab('comunidad',this)">Comunidad</button>
+      <button class="nav-tab" onclick="switchTab('evaluar',this)">Evaluar</button>
+    </div>
+    <div class="nav-right">
+      <span class="nav-user" id="nav-user"></span>
+      <button class="btn-out" onclick="handleLogout()">Salir</button>
+    </div>
+  </nav>
+  <div class="content">
+    <!-- AGENDA -->
+    <div id="tab-agenda" class="tab-content active">
+      <div class="page-header">
+        <div class="overline">Hotmart Boost · Dynamis Pocket</div>
+        <h1>Agenda del día</h1>
+        <p>Cronograma completo de la sesión</p>
+      </div>
+      <div class="schedule" id="schedule-list"></div>
+    </div>
+    <!-- COMUNIDAD -->
+    <div id="tab-comunidad" class="tab-content">
+      <div class="page-header">
+        <div class="overline">Participantes</div>
+        <h1>Comunidad</h1>
+        <p>Conoce a quienes están en el evento</p>
+      </div>
+      <div class="mem-header">
+        <div class="mem-count" id="mem-count">—</div>
+        <button class="btn-add" onclick="openModal('modal-member')">+ Mi perfil</button>
+      </div>
+      <div class="mem-grid" id="mem-grid"><div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div></div>
+    </div>
+    <!-- EVALUAR -->
+    <div id="tab-evaluar" class="tab-content">
+      <div class="page-header">
+        <div class="overline">Tu opinión importa</div>
+        <h1>Evalúa el evento</h1>
+        <p>Tu feedback nos ayuda a mejorar</p>
+      </div>
+      <div class="eval-banner">
+        <div><h3>¿Cómo estuvo?</h3><p>Completa el formulario — toma menos de 2 minutos</p></div>
+        <div class="eval-icon">🔥</div>
+      </div>
+      <div class="tf-wrap">
+        <iframe src="https://hotmart1.typeform.com/to/uleZ41Yd" allow="camera; microphone; autoplay; encrypted-media;" title="Evaluación Dynamis Pocket"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div id="screen-admin-login" class="screen">
+  <div class="login-wrap">
+    <div class="login-card">
+      <h2 style="color:#fff;margin-bottom:6px">Admin</h2>
+      <p style="margin-bottom:20px">Acceso restringido</p>
+      <div class="login-error" id="admin-error">Contraseña incorrecta</div>
+      <div class="field"><label>Contraseña</label><input type="password" id="admin-pass" placeholder="••••••••"/></div>
+      <button class="btn-enter" onclick="handleAdminLogin()">Entrar</button>
+      <div class="login-guest" onclick="showScreen('screen-login')">← Volver</div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="screen-admin" class="screen">
+  <div class="adm-nav">
+    <div style="width:10px;height:10px;border-radius:50%;background:var(--fire)"></div>
+    <div class="adm-nav-title">Admin · Boost</div>
+    <div class="adm-nav-right">
+      <button class="btn-out" onclick="showScreen('screen-app')">← App</button>
+      <button class="btn-out" onclick="handleLogout()">Salir</button>
+    </div>
+  </div>
+  <div class="adm-body">
+    <div class="adm-tabs">
+      <button class="adm-tab active" onclick="switchAdminTab('adm-agenda')">📅 Agenda</button>
+      <button class="adm-tab" onclick="switchAdminTab('adm-miembros')">👥 Miembros</button>
+    </div>
+    <div id="admin-adm-agenda" class="adm-section active">
+      <h3 style="font-family:var(--font-head);font-size:20px;font-weight:800;margin-bottom:16px">Agregar sesión</h3>
+      <div class="card">
+        <div class="fr">
+          <div class="fg"><label class="fl">Hora</label><input type="text" id="ag-time" class="fi" placeholder="15:00"/></div>
+          <div class="fg"><label class="fl">Tipo</label><select id="ag-type" class="fi"><option value="ponencia">Ponencia</option><option value="break">Break</option><option value="hotseat">Hotseat</option><option value="highlight">Destacado</option><option value="cierre">Cierre</option></select></div>
+        </div>
+        <div class="fg"><label class="fl">Título</label><input type="text" id="ag-title" class="fi" placeholder="Ej: Ponencia 1 | Las 7 fases..."/></div>
+        <div class="fg"><label class="fl">Speaker (opcional)</label><input type="text" id="ag-speaker" class="fi" placeholder="Nombre del ponente"/></div>
+        <div class="fg"><label class="fl">Orden</label><input type="number" id="ag-order" class="fi" placeholder="1" min="1"/></div>
+        <button class="btn-save" onclick="saveAgendaItem()">Agregar</button>
+      </div>
+      <h3 style="font-family:var(--font-head);font-size:18px;font-weight:800;margin:22px 0 12px">Sesiones</h3>
+      <div style="overflow-x:auto"><table class="adm-table"><thead><tr><th>#</th><th>Hora</th><th>Título</th><th>Tipo</th><th></th></tr></thead><tbody id="adm-agenda-body"></tbody></table></div>
+    </div>
+    <div id="admin-adm-miembros" class="adm-section">
+      <h3 style="font-family:var(--font-head);font-size:20px;font-weight:800;margin-bottom:16px">Miembros</h3>
+      <div style="overflow-x:auto"><table class="adm-table"><thead><tr><th>Nombre</th><th>País</th><th>Poder</th><th>WA</th><th></th></tr></thead><tbody id="adm-members-body"></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="modal-member">
+  <div class="modal">
+    <div class="modal-title">Mi perfil <span>Boost</span></div>
+    <div class="fg"><label class="fl">Nombre *</label><input type="text" id="m-name" class="fi" placeholder="Tu nombre"/></div>
+    <div class="fg"><label class="fl">Súper poder</label><input type="text" id="m-skill" class="fi" placeholder="Ads, Email, Lanzamientos..."/></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">País</label><input type="text" id="m-country" class="fi" placeholder="México 🇲🇽"/></div>
+      <div class="fg"><label class="fl">WhatsApp</label><input type="tel" id="m-phone" class="fi" placeholder="+52 55..."/></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Instagram</label><input type="text" id="m-ig" class="fi" placeholder="@usuario"/></div>
+      <div class="fg"><label class="fl">Email Hotmart</label><input type="email" id="m-email" class="fi" placeholder="tu@email.com"/></div>
+    </div>
+    <div class="fg"><label class="fl">Desafío actual</label><textarea id="m-challenge" class="fta" placeholder="¿En qué necesitas apoyo?"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-member')">Cancelar</button>
+      <button class="btn-save" onclick="saveMember()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSyDZIRNjfOXwAPdf_FODCS2nJSEfzFrcjvE",
+  authDomain:"nova30-97f1b.firebaseapp.com",
+  databaseURL:"https://nova30-97f1b-default-rtdb.firebaseio.com",
+  projectId:"nova30-97f1b",
+  storageBucket:"nova30-97f1b.firebasestorage.app",
+  messagingSenderId:"775146781721",
+  appId:"1:775146781721:web:3e6390b107a1829a3cfe88"
+},'boost-pocket');
+const db = getDatabase(app);
+const DB = p => ref(db,'boost_pocket/'+p);
+const PASS = "boost2026admin";
+let user = null;
+
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+window.showScreen=id=>{document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');};
+window.openModal=id=>document.getElementById(id).classList.add('open');
+window.closeModal=id=>document.getElementById(id).classList.remove('open');
+window.switchTab=(n,el)=>{document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));document.getElementById('tab-'+n).classList.add('active');el.classList.add('active');};
+window.switchAdminTab=n=>{document.querySelectorAll('.adm-section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.adm-tab').forEach(t=>t.classList.remove('active'));document.getElementById('admin-'+n).classList.add('active');event.currentTarget.classList.add('active');};
+window.handleLogin=()=>{const p=document.getElementById('login-phone').value.trim();if(p.length<7){document.getElementById('login-error').style.display='block';return;}document.getElementById('login-error').style.display='none';user={phone:p};localStorage.setItem('bp_user',JSON.stringify(user));document.getElementById('nav-user').textContent=p;showScreen('screen-app');loadAll();};
+window.handleGuest=()=>{user={phone:'invitado',guest:true};document.getElementById('nav-user').textContent='Invitado';showScreen('screen-app');loadAll();};
+window.handleLogout=()=>{user=null;localStorage.removeItem('bp_user');showScreen('screen-login');};
+window.handleAdminLogin=()=>{if(document.getElementById('admin-pass').value===PASS){document.getElementById('admin-error').style.display='none';showScreen('screen-admin');loadAdminData();}else{document.getElementById('admin-error').style.display='block';}};
+
+function loadAll(){loadAgenda();loadMembers();}
+
+function loadAgenda(){onValue(DB('agenda'),snap=>{renderSchedule(snap.val()||{});});}
+function renderSchedule(data){
+  const list=document.getElementById('schedule-list');
+  const entries=Object.entries(data).sort((a,b)=>(a[1].order||999)-(b[1].order||999));
+  if(!entries.length){list.innerHTML='<p style="color:var(--ink-mid);font-size:13px;padding:32px 0;text-align:center">La agenda se publicará pronto</p>';return;}
+  list.innerHTML=entries.map(([id,e])=>{
+    const tc='t-'+(e.type||'ponencia');
+    return`<div class="sch-item ${tc}"><div class="sch-time">${e.time||''}</div><div class="sch-card"><div class="sch-title">${e.title}</div>${e.speaker?`<div class="sch-speaker">${e.speaker}</div>`:''}</div></div>`;
+  }).join('');
+}
+
+function loadMembers(){onValue(DB('members'),snap=>{
+  const data=snap.val()||{};
+  const entries=Object.entries(data);
+  document.getElementById('mem-count').innerHTML=`<strong>${entries.length}</strong> miembro${entries.length!==1?'s':''}`;
+  const grid=document.getElementById('mem-grid');
+  if(!entries.length){grid.innerHTML='<div class="empty-state"><div class="icon">🙌</div><p>Sé el primero en agregar tu perfil</p></div>';return;}
+  grid.innerHTML=entries.map(([id,m])=>{
+    const ini=(m.name||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    return`<div class="mem-card"><div class="mem-avatar">${ini}</div><div class="mem-name">${m.name||''}</div><div class="mem-skill">${m.skill||''}</div><div class="mem-country">${m.country||''}</div><div class="mem-links">${m.ig?`<a href="https://instagram.com/${m.ig.replace('@','')}" target="_blank" class="mem-link">📸 ${m.ig}</a>`:''} ${m.email?`<a href="mailto:${m.email}" class="mem-link">✉️ email</a>`:''}</div>${m.challenge?`<div class="mem-challenge">"${m.challenge}"</div>`:''}</div>`;
+  }).join('');
+});}
+
+window.saveMember=async()=>{
+  const name=document.getElementById('m-name').value.trim();
+  if(!name){toast('El nombre es obligatorio');return;}
+  await push(DB('members'),{name,skill:document.getElementById('m-skill').value.trim(),country:document.getElementById('m-country').value.trim(),phone:document.getElementById('m-phone').value.trim()||user?.phone,ig:document.getElementById('m-ig').value.trim(),email:document.getElementById('m-email').value.trim(),challenge:document.getElementById('m-challenge').value.trim(),at:new Date().toISOString()});
+  closeModal('modal-member');toast('✅ Perfil agregado');
+};
+
+function loadAdminData(){
+  onValue(DB('agenda'),snap=>{
+    const data=snap.val()||{};
+    const tbody=document.getElementById('adm-agenda-body');
+    const entries=Object.entries(data).sort((a,b)=>(a[1].order||999)-(b[1].order||999));
+    tbody.innerHTML=entries.map(([id,e])=>`<tr><td style="color:var(--ink-mid)">${e.order||''}</td><td style="font-weight:600;color:var(--fire)">${e.time}</td><td>${e.title}</td><td style="color:var(--ink-mid)">${e.type}</td><td><button class="btn-danger" onclick="deleteEntry('agenda/${id}')">✕</button></td></tr>`).join('')||'<tr><td colspan="5" style="color:var(--ink-mid)">Sin sesiones</td></tr>';
+  },{onlyOnce:true});
+  onValue(DB('members'),snap=>{
+    const data=snap.val()||{};
+    const tbody=document.getElementById('adm-members-body');
+    tbody.innerHTML=Object.entries(data).map(([id,m])=>`<tr><td style="font-weight:600">${m.name}</td><td>${m.country||''}</td><td style="color:var(--fire)">${m.skill||''}</td><td>${m.phone||''}</td><td><button class="btn-danger" onclick="deleteEntry('members/${id}')">✕</button></td></tr>`).join('')||'<tr><td colspan="5" style="color:var(--ink-mid)">Sin miembros</td></tr>';
+  },{onlyOnce:true});
+}
+
+window.saveAgendaItem=async()=>{
+  const title=document.getElementById('ag-title').value.trim();
+  const time=document.getElementById('ag-time').value.trim();
+  const order=parseInt(document.getElementById('ag-order').value)||99;
+  if(!title||!time){toast('Hora y título son obligatorios');return;}
+  await push(DB('agenda'),{title,time,order,type:document.getElementById('ag-type').value,speaker:document.getElementById('ag-speaker').value.trim(),at:new Date().toISOString()});
+  ['ag-title','ag-time','ag-speaker','ag-order'].forEach(id=>document.getElementById(id).value='');
+  toast('✅ Sesión agregada');loadAdminData();
+};
+
+window.deleteEntry=async path=>{
+  if(!confirm('¿Eliminar?'))return;
+  await remove(ref(db,'boost_pocket/'+path));
+  toast('Eliminado');loadAdminData();
+};
+
+const saved=localStorage.getItem('bp_user');
+if(saved){user=JSON.parse(saved);document.getElementById('nav-user').textContent=user.phone;showScreen('screen-app');loadAll();}
+</script>
+</body>
+</html>
